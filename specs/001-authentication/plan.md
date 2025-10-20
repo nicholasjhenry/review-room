@@ -1,0 +1,188 @@
+# Implementation Plan: User Authentication System
+
+**Branch**: `001-authentication` | **Date**: 2025-10-20 | **Spec**: [spec.md](./spec.md)
+**Input**: Feature specification from `/specs/001-authentication/spec.md`
+
+**Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/commands/plan.md` for the execution workflow.
+
+## Summary
+
+Implement a complete user authentication system with email/password using Phoenix's `phx.gen.auth` generator with LiveView support. The system will provide registration, login, logout, password reset, email change, password change, and session management capabilities. The generator will create the Accounts context, User and UserToken schemas, authentication LiveViews, and all necessary templates following Phoenix 1.8+ best practices.
+
+## Technical Context
+
+<!--
+  ACTION REQUIRED: Replace the content in this section with the technical details
+  for the project. The structure here is presented in advisory capacity to guide
+  the iteration process.
+-->
+
+**Language/Version**: Elixir 1.15+, Phoenix 1.8.1, Phoenix LiveView 1.1.0
+**Primary Dependencies**: Phoenix (phx.gen.auth generator), Ecto 3.13+, Bcrypt (Unix) or Pbkdf2 (Windows), Swoosh (email notifier)
+**Storage**: PostgreSQL via Postgrex adapter
+**Testing**: ExUnit (built-in), Phoenix.LiveViewTest, LazyHTML for assertions
+**Target Platform**: Web application (server-side rendered LiveView)
+**Project Type**: Web application (Phoenix single project structure)
+**Performance Goals**: < 10s login response, 100 concurrent authentication requests, < 3min complete registration workflow
+**Constraints**:
+
+- Must use `phx.gen.auth` generator with `--live` flag
+- Email delivery in dev logs to terminal only (Swoosh notifier)
+- Session tokens stored in database for revocation capability
+- Password hashing via bcrypt (Unix) or pbkdf2 (Windows)
+- All auth pages must use LiveView (no conventional controllers)
+
+**Scale/Scope**:
+
+- 7 user stories (3 P1 MVP, 3 P2, 1 P3)
+- 20 functional requirements
+- 2 schemas (User, UserToken)
+- 1 context module (Accounts)
+- 6-8 LiveView modules for auth pages
+
+## Constitution Check
+
+_GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
+
+### Principle I: Test-First Development (NON-NEGOTIABLE)
+
+- ✅ **PASS**: All generated authentication code from `phx.gen.auth` includes comprehensive test coverage
+- ✅ **PASS**: Generator creates tests for all contexts, schemas, and LiveViews before implementation
+- ✅ **PASS**: Tests will be reviewed and verified to fail before running generator
+- ⚠️ **ACTION REQUIRED**: Must manually verify generated tests fail before running migrations
+
+### Principle II: Phoenix/LiveView Best Practices
+
+- ✅ **PASS**: Using `phx.gen.auth --live` flag ensures LiveView-based authentication pages
+- ✅ **PASS**: Generator produces Phoenix 1.8+ compatible code with modern patterns
+- ✅ **PASS**: Generated code uses `<.form>` with `to_form/2` pattern
+- ✅ **PASS**: LiveViews will use proper `<Layouts.app>` wrapper
+- ✅ **PASS**: Generated code uses `<.link navigate={}>` and `<.link patch={}>` (no deprecated functions)
+
+### Principle III: Type Safety & Compile-Time Guarantees
+
+- ✅ **PASS**: Generated Ecto schemas use proper type specifications
+- ✅ **PASS**: Context functions include `@spec` annotations
+- ✅ **PASS**: Pattern matching used throughout generated code
+- ✅ **PASS**: All code will pass `mix precommit` quality gate (compile with warnings as errors)
+
+### Principle IV: LiveView Streams for Collections
+
+- ⚠️ **NOT APPLICABLE**: Authentication feature does not render collections of items
+- ✅ **PASS**: If session management (P3) implemented, will use streams for session list
+
+### Principle V: Quality Gates & Precommit
+
+- ✅ **PASS**: Must run `mix precommit` after generation to verify quality
+- ✅ **PASS**: All generated tests must pass
+- ✅ **PASS**: Zero compiler warnings enforced
+- ✅ **PASS**: Code formatting with `mix format`
+
+### Pre-Phase 0 Gate Status: ✅ PASS
+
+All constitution principles are satisfied. The `phx.gen.auth` generator is specifically designed to produce test-first, best-practice Phoenix code. No violations require justification.
+
+## Project Structure
+
+### Documentation (this feature)
+
+```
+specs/001-authentication/
+├── spec.md              # Feature specification (created by /speckit.specify)
+├── plan.md              # This file (/speckit.plan command output)
+├── research.md          # Phase 0 output (/speckit.plan command)
+├── data-model.md        # Phase 1 output (/speckit.plan command)
+├── quickstart.md        # Phase 1 output (/speckit.plan command)
+├── contracts/           # Phase 1 output (/speckit.plan command)
+│   └── auth-flows.md    # Authentication flow documentation
+└── tasks.md             # Phase 2 output (/speckit.tasks command - NOT created by /speckit.plan)
+```
+
+### Source Code (repository root)
+
+```
+lib/review_room/
+├── accounts/                    # Generated by phx.gen.auth
+│   ├── user.ex                  # User schema (email, hashed_password, confirmed_at)
+│   ├── user_token.ex            # UserToken schema (session, confirm, reset contexts)
+│   └── user_notifier.ex         # Email notification functions (logs to terminal)
+└── accounts.ex                  # Accounts context (registration, auth, password reset)
+
+lib/review_room_web/
+├── live/
+│   └── user_*_live.ex           # Generated authentication LiveViews
+│       ├── user_registration_live.ex
+│       ├── user_login_live.ex
+│       ├── user_reset_password_live.ex
+│       ├── user_forgot_password_live.ex
+│       ├── user_settings_live.ex
+│       └── user_confirmation_live.ex
+├── controllers/
+│   └── user_session_controller.ex  # Session management (login/logout)
+└── components/
+    └── layouts.ex               # Modified to add auth nav links
+
+test/review_room/
+└── accounts_test.exs            # Generated context tests
+
+test/review_room_web/
+└── live/
+    └── user_*_live_test.exs     # Generated LiveView tests
+
+test/support/
+├── fixtures/
+│   └── accounts_fixtures.ex     # Test data helpers
+└── conn_case.ex                 # Modified with auth test helpers
+
+priv/repo/migrations/
+└── *_create_users_auth_tables.exs  # Generated migration
+```
+
+**Structure Decision**: Phoenix single project structure with standard layout. The `phx.gen.auth` generator will create the `Accounts` context under `lib/review_room/`, authentication LiveViews under `lib/review_room_web/live/`, and corresponding tests. All generated code follows Phoenix 1.8+ conventions and integrates with existing project structure.
+
+## Post-Phase 1 Constitution Check
+
+_Re-evaluation after Phase 1 design complete_
+
+### Principle I: Test-First Development (NON-NEGOTIABLE)
+
+- ✅ **CONFIRMED**: quickstart.md documents Red-Green-Refactor workflow
+- ✅ **CONFIRMED**: Tests MUST be run before migrations (documented in Step 4)
+- ✅ **CONFIRMED**: Test failure expected before implementation (Step 4)
+- ✅ **CONFIRMED**: Test success after implementation (Step 6)
+- ✅ **CONFIRMED**: Quality gates enforced in Step 7
+
+### Principle II: Phoenix/LiveView Best Practices
+
+- ✅ **CONFIRMED**: data-model.md shows proper Ecto schema patterns
+- ✅ **CONFIRMED**: contracts/auth-flows.md documents LiveView routes
+- ✅ **CONFIRMED**: :on_mount hooks documented for authentication
+- ✅ **CONFIRMED**: No deprecated patterns in generated code
+
+### Principle III: Type Safety & Compile-Time Guarantees
+
+- ✅ **CONFIRMED**: User and UserToken schemas use `:binary_id` types
+- ✅ **CONFIRMED**: Validation functions use pattern matching
+- ✅ **CONFIRMED**: mix precommit enforced in quickstart Step 7
+
+### Principle IV: LiveView Streams for Collections
+
+- ✅ **CONFIRMED**: Not applicable for this feature (no collections rendered)
+- ✅ **NOTED**: Future session management (P3) will require streams
+
+### Principle V: Quality Gates & Precommit
+
+- ✅ **CONFIRMED**: quickstart.md Step 7 enforces all quality gates
+- ✅ **CONFIRMED**: Compile warnings as errors checked
+- ✅ **CONFIRMED**: Format checking documented
+- ✅ **CONFIRMED**: Full test suite required
+
+### Post-Phase 1 Gate Status: ✅ PASS
+
+All constitution principles remain satisfied after design phase. Implementation plan follows Test-First Development, enforces quality gates, and uses Phoenix best practices throughout.
+
+## Complexity Tracking
+
+_No violations - complexity tracking not required_
+
+This feature uses the official Phoenix generator which inherently follows best practices and constitution principles. No custom complexity or justification needed.
