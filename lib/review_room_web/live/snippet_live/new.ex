@@ -56,9 +56,9 @@ defmodule ReviewRoomWeb.SnippetLive.New do
               type="textarea"
               label="Code"
               required
-              rows="15"
+              rows="25"
               phx-debounce="300"
-              class="font-mono text-sm"
+              class="font-mono text-sm min-h-[500px]"
             />
           </div>
 
