@@ -1,0 +1,13 @@
+{
+  "name": "review_room_assets",
+  "version": "1.0.0",
+  "description": "Assets for ReviewRoom Phoenix application",
+  "private": true,
+  "scripts": {
+    "build": "esbuild js/app.js --bundle --target=es2022 --outdir=../priv/static/assets/js"
+  },
+  "dependencies": {
+    "highlight.js": "^11.9.0"
+  },
+  "devDependencies": {}
+}

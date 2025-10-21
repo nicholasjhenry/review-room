@@ -18,6 +18,7 @@
 ## Path Conventions
 
 **Phoenix Project Structure** (from plan.md):
+
 - `lib/review_room/` - Context modules and schemas
 - `lib/review_room_web/` - LiveView modules and controllers
 - `test/review_room/` - Context tests
@@ -32,13 +33,13 @@
 
 **Purpose**: Project initialization and dependency setup
 
-- [ ] T001 Add nanoid dependency to mix.exs (research.md Decision 3)
-- [ ] T002 [P] Add highlight.js to assets/package.json (research.md Decision 1)
-- [ ] T003 [P] Run mix deps.get to install nanoid
-- [ ] T004 [P] Run npm install in assets/ to install highlight.js
-- [ ] T005 Import highlight.js in assets/js/app.js
+- [x] T001 Add nanoid dependency to mix.exs (research.md Decision 3)
+- [x] T002 [P] Add highlight.js to assets/package.json (research.md Decision 1)
+- [x] T003 [P] Run mix deps.get to install nanoid
+- [x] T004 [P] Run npm install in assets/ to install highlight.js
+- [x] T005 Import highlight.js in assets/js/app.js
 
-**Checkpoint**: Dependencies installed, ready for database and code setup
+**Checkpoint**: ✅ Dependencies installed, ready for database and code setup
 
 ---
 
@@ -50,22 +51,22 @@
 
 ### Database Setup
 
-- [ ] T006 Create migration priv/repo/migrations/YYYYMMDDHHMMSS_create_snippets.exs (data-model.md)
-- [ ] T007 Run mix ecto.migrate to create snippets table
+- [x] T006 Create migration priv/repo/migrations/YYYYMMDDHHMMSS_create_snippets.exs (data-model.md)
+- [x] T007 Run mix ecto.migrate to create snippets table
 
 ### Schema and Context Foundation
 
-- [ ] T008 Create Snippets context module lib/review_room/snippets.ex
-- [ ] T009 Create Snippet schema lib/review_room/snippets/snippet.ex (data-model.md)
-- [ ] T010 Add snippets relationship to User schema lib/review_room/accounts/user.ex
+- [x] T008 Create Snippets context module lib/review_room/snippets.ex
+- [x] T009 Create Snippet schema lib/review_room/snippets/snippet.ex (data-model.md)
+- [x] T010 Add snippets relationship to User schema lib/review_room/accounts/user.ex
 
 ### Real-Time Infrastructure
 
-- [ ] T011 Create PresenceTracker module lib/review_room/snippets/presence_tracker.ex (research.md Decision 2)
-- [ ] T012 Add PresenceTracker to supervision tree in lib/review_room/application.ex
-- [ ] T013 [P] Create router routes in lib/review_room_web/router.ex (quickstart.md)
+- [x] T011 Create PresenceTracker module lib/review_room/snippets/presence_tracker.ex (research.md Decision 2)
+- [x] T012 Add PresenceTracker to supervision tree in lib/review_room/application.ex
+- [x] T013 [P] Create router routes in lib/review_room_web/router.ex (quickstart.md)
 
-**Checkpoint**: Foundation ready - user story implementation can now begin in parallel
+**Checkpoint**: ✅ Foundation ready - user story implementation can now begin in parallel
 
 ---
 
@@ -79,22 +80,22 @@
 
 **CONSTITUTION REQUIREMENT: Write these tests FIRST, get approval, verify FAIL, then implement**
 
-- [ ] T014 [P] [US1] Schema tests in test/review_room/snippets/snippet_test.exs
+- [x] T014 [P] [US1] Schema tests in test/review_room/snippets/snippet_test.exs
   - Test create_changeset with valid attrs generates nanoid
   - Test code field is required
   - Test language validation
   - Test visibility enum validation
-- [ ] T015 [P] [US1] Context tests in test/review_room/snippets_test.exs
+- [x] T015 [P] [US1] Context tests in test/review_room/snippets_test.exs
   - Test create_snippet/2 with valid attributes
   - Test create_snippet/2 with invalid attributes
   - Test get_snippet!/1 returns snippet
   - Test get_snippet!/1 raises on not found
-- [ ] T016 [P] [US1] LiveView test for New in test/review_room_web/live/snippet_live/new_test.exs
+- [x] T016 [P] [US1] LiveView test for New in test/review_room_web/live/snippet_live/new_test.exs
   - Test mount displays form
   - Test validate event updates changeset
   - Test save event creates snippet and redirects
   - Test save with errors shows validation messages
-- [ ] T017 [P] [US1] LiveView test for Show in test/review_room_web/live/snippet_live/show_test.exs
+- [x] T017 [P] [US1] LiveView test for Show in test/review_room_web/live/snippet_live/show_test.exs
   - Test mount loads snippet by ID
   - Test displays code content
   - Test displays title and description
@@ -103,36 +104,36 @@
 
 ### Implementation for User Story 1
 
-- [ ] T018 [US1] Implement Snippet schema in lib/review_room/snippets/snippet.ex
+- [x] T018 [US1] Implement Snippet schema in lib/review_room/snippets/snippet.ex
   - Primary key as :string (nanoid)
   - Fields: code, title, description, language, visibility
   - Belongs_to user relationship
   - create_changeset and update_changeset functions
   - generate_id/1 using Nanoid.generate(8)
   - supported_languages/0 validation list
-- [ ] T019 [US1] Implement Snippets context in lib/review_room/snippets.ex
+- [x] T019 [US1] Implement Snippets context in lib/review_room/snippets.ex
   - create_snippet/2 function
   - get_snippet!/1 function
   - change_snippet/2 function for forms
-- [ ] T020 [US1] Create SnippetLive.New in lib/review_room_web/live/snippet_live/new.ex
+- [x] T020 [US1] Create SnippetLive.New in lib/review_room_web/live/snippet_live/new.ex
   - mount/3 with form initialization using to_form/2
   - handle_event("validate", ...)
   - handle_event("save", ...) with redirect to show page
   - Language dropdown with 20+ languages
   - Visibility select (public/private)
-- [ ] T021 [US1] Create SnippetLive.Show in lib/review_room_web/live/snippet_live/show.ex
+- [x] T021 [US1] Create SnippetLive.Show in lib/review_room_web/live/snippet_live/show.ex
   - mount/3 loads snippet by ID
   - Display code in <pre><code> with language class
   - Display title and description
   - Add DOM ID "code-display" with phx-hook="SyntaxHighlight"
   - Add phx-update="ignore" to code container
-- [ ] T022 [P] [US1] Create SyntaxHighlight hook in assets/js/hooks/syntax_highlight.js
+- [x] T022 [P] [US1] Create SyntaxHighlight hook in assets/js/hooks/syntax_highlight.js
   - Export SyntaxHighlight with mounted() and updated() callbacks
   - Call hljs.highlightElement(codeBlock) in highlight()
-- [ ] T023 [P] [US1] Register SyntaxHighlight hook in assets/js/app.js
+- [x] T023 [P] [US1] Register SyntaxHighlight hook in assets/js/app.js
   - Import { SyntaxHighlight } from "./hooks/syntax_highlight"
   - Add to LiveSocket hooks: { SyntaxHighlight }
-- [ ] T024 [US1] Add snippet routes to lib/review_room_web/router.ex
+- [x] T024 [US1] Add snippet routes to lib/review_room_web/router.ex
   - Public: live "/s/:id", SnippetLive.Show, :show
   - Auth: live "/snippets/new", SnippetLive.New, :new
 
@@ -174,7 +175,7 @@
   - Add @presences assign
   - handle_event("cursor_moved", %{"line" => ..., "column" => ...})
   - handle_event("text_selected", %{"start" => ..., "end" => ...})
-  - handle_event("selection_cleared", _)
+  - handle*event("selection_cleared", *)
   - handle_info({:presence_diff, diff}, socket) to merge presences
 - [ ] T029 [P] [US2] Create CursorTracker hook in assets/js/hooks/cursor_tracker.js
   - mousemove listener with throttle (100ms)
@@ -276,7 +277,7 @@
   - Broadcast snippet_deleted via PubSub on delete
 - [ ] T043 [US4] Update SnippetLive.Show for edit broadcasts in lib/review_room_web/live/snippet_live/show.ex
   - handle_info({:snippet_updated, data}, socket) - reload snippet
-  - handle_info({:snippet_deleted, _}, socket) - redirect with flash
+  - handle*info({:snippet_deleted, *}, socket) - redirect with flash
 - [ ] T044 [US4] Create UserSnippetLive.Index in lib/review_room_web/live/user_snippet_live/index.ex
   - mount/3 requires authentication
   - Load user snippets with stream/3
@@ -369,7 +370,7 @@
   - handle_event("load_more", %{"cursor" => cursor})
   - handle_event("filter", %{"language" => lang}) with reset: true
   - handle_event("search", %{"query" => q}) with reset: true
-  - handle_event("clear_search", _) resets to all public
+  - handle*event("clear_search", *) resets to all public
 - [ ] T058 [US6] Create gallery template with stream rendering
   - div id="snippets" phx-update="stream"
   - :for={{id, snippet} <- @streams.snippets}
@@ -498,6 +499,7 @@ Foundational (Phase 2) ─┬─→ US1 (P1) ─┬─→ US4 (P3) ─→ US5 (P
 ```
 
 **Independence**:
+
 - US1, US2 can start in parallel after Foundational
 - US4, US6 can start in parallel after US1
 - US3 requires US2 (cursor tracking infrastructure)
@@ -522,11 +524,13 @@ Setup → Foundational → US1 → US2 → US3 → US4 → US5 → US6 → Polis
 ### Parallel Opportunities
 
 **Within Foundational Phase (T006-T013)**:
+
 - T006-T007 (database) sequential
 - T008-T010 (schemas) after database
 - T011-T013 (presence, routes) in parallel with schemas
 
 **Within US1 (T014-T024)**:
+
 - T014-T017 (all tests) in parallel
 - T018-T019 (schema, context) in parallel after tests
 - T020-T021 (New, Show LiveViews) in parallel after context
@@ -534,6 +538,7 @@ Setup → Foundational → US1 → US2 → US3 → US4 → US5 → US6 → Polis
 - T024 (routes) after LiveViews
 
 **Within US2 (T025-T031)**:
+
 - T025-T026 (tests) in parallel
 - T027 (PresenceTracker) after tests
 - T028 (Show updates) after PresenceTracker
@@ -541,12 +546,14 @@ Setup → Foundational → US1 → US2 → US3 → US4 → US5 → US6 → Polis
 - T031 (template update) after all
 
 **Across User Stories** (if team has capacity):
+
 - After Foundational: US1 and US2 in parallel
 - After US1: US4 and US6 in parallel
 - US3 waits for US2
 - US5 waits for US1 and US4
 
 **Polish Phase (T062-T075)**:
+
 - Most tasks marked [P] can run in parallel
 - T071-T073 (testing) sequential at end
 - T074-T075 (docs) in parallel
@@ -590,6 +597,7 @@ mix test
 **Phases**: 9 (Setup, Foundational, 6 User Stories, Polish)
 
 **Breakdown by Phase**:
+
 - Phase 1 (Setup): 5 tasks
 - Phase 2 (Foundational): 8 tasks
 - Phase 3 (US1 - MVP): 11 tasks
@@ -607,6 +615,7 @@ mix test
 **Full Feature**: All 75 tasks
 
 **Independent Test Criteria**:
+
 - ✅ US1: Create snippet → get link → view with highlighting
 - ✅ US2: Open 2 browsers → move cursor → see update <200ms
 - ✅ US3: Open 2 sessions → verify presence list shows both

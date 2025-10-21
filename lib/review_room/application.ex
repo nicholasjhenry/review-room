@@ -12,6 +12,8 @@ defmodule ReviewRoom.Application do
       ReviewRoom.Repo,
       {DNSCluster, query: Application.get_env(:review_room, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: ReviewRoom.PubSub},
+      # Start the PresenceTracker for real-time snippet collaboration
+      {ReviewRoom.Snippets.PresenceTracker, pubsub_server: ReviewRoom.PubSub},
       # Start a worker by calling: ReviewRoom.Worker.start_link(arg)
       # {ReviewRoom.Worker, arg},
       # Start to serve requests, typically the last entry
