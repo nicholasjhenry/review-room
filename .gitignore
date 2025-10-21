@@ -35,3 +35,21 @@ review_room-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
