@@ -15,5 +15,5 @@ script/update
 NODE_NAME=${CONDUCTOR_WORKSPACE_NAME:-test}
 
 # boot the app and any other necessary processes.
-docker compose up -d
+script/docker up
 eval "$(read_env)" iex --name $NODE_NAME@127.0.0.1 --cookie mycookie -S mix phx.server

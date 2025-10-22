@@ -8,5 +8,4 @@ cd "$(dirname "$0")/.."
 
 source ./script/sh/read_env
 
-eval "$(read_env)" mix ecto.drop
-eval "$(read_env)" MIX_ENV=test mix ecto.drop
+script/docker down

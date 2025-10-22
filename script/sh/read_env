@@ -4,7 +4,7 @@
 #             Example:
 #
 #                 source ./script/sh/read_env
-#                 eval "$(read_vars) iex -S mix
+#                 eval $(read_env) iex -S mix
 
 read_env() {
     if [ ! -f .env ]; then

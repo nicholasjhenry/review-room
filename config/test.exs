@@ -12,7 +12,8 @@ config :review_room, ReviewRoom.Repo,
   username: "postgres",
   password: "postgres",
   hostname: "localhost",
-  database: "review_room_test#{System.get_env("CONDUCTOR_WORKSPACE_NAME")}#{System.get_env("MIX_TEST_PARTITION")}",
+  database: "review_room_test#{System.get_env("MIX_TEST_PARTITION")}",
+  port: String.to_integer(System.get_env("CONDUCTOR_PORT", "5432")),
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
 
