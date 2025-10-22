@@ -11,8 +11,6 @@ source ./script/sh/read_env
 script/bootstrap
 
 echo "==> Setting up project…"
-# reset database to a fresh state.
-eval "$(read_env)" mix ecto.drop
 eval "$(read_env)" mix setup
 
 echo "==> The project is setup! 🚀 Is there demo data to load?"

@@ -1,0 +1,23 @@
+#!/bin/sh
+
+# script/worktree: Setup for working in a git worktree
+#
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+symlink_if_exists() {
+    filename="$1"
+    if [ -f "$filename" ]; then
+        echo "==> Skipping $filename already linked."
+    elif [ -f "../../$filename" ]; then
+        echo "==> Symlinking $filename from main repo root…"
+        ln -s "../../$filename" "$filename"
+    else
+        echo "==> No $filename file found in main repo root, skipping."
+    fi
+}
+
+symlink_if_exists .claude
+symlink_if_exists .env
