@@ -95,6 +95,27 @@ defmodule ReviewRoomWeb.SnippetLive.Show do
           <div id="snippet-code-content" class="hidden">{@snippet.code}</div>
         </div>
 
+        <%!-- Presence List (Temporary Debug View) --%>
+        <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <h3 class="text-sm font-semibold text-blue-900 mb-2">
+            Active Viewers ({map_size(@presences)})
+          </h3>
+          <ul class="space-y-1">
+            <%= for {user_id, %{metas: metas}} <- @presences do %>
+              <% [meta] = metas %>
+              <li class="text-sm text-blue-800">
+                <strong>{meta.display_name}</strong>
+                <%= if meta[:cursor] do %>
+                  - Cursor: Line {meta.cursor.line}, Col {meta.cursor.column}
+                <% end %>
+                <%= if meta[:selection] do %>
+                  - Selection: L{meta.selection.start.line}:{meta.selection.start.column} → L{meta.selection.end.line}:{meta.selection.end.column}
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+
         <div class="mt-6 flex gap-4">
           <.link navigate={~p"/snippets/new"} class="text-blue-600 hover:text-blue-800">
             Create New Snippet
@@ -180,8 +201,8 @@ defmodule ReviewRoomWeb.SnippetLive.Show do
 
   defp get_user_id(socket, session) do
     cond do
-      Map.has_key?(socket.assigns, :current_user) and socket.assigns.current_user != nil ->
-        "user_#{socket.assigns.current_user.id}"
+      socket.assigns[:current_scope] && socket.assigns.current_scope.user ->
+        "user_#{socket.assigns.current_scope.user.id}"
 
       Map.has_key?(session, "live_socket_id") ->
         session["live_socket_id"]
@@ -193,8 +214,8 @@ defmodule ReviewRoomWeb.SnippetLive.Show do
   end
 
   defp get_display_name(socket) do
-    if Map.has_key?(socket.assigns, :current_user) and socket.assigns.current_user != nil do
-      socket.assigns.current_user.email
+    if socket.assigns[:current_scope] && socket.assigns.current_scope.user do
+      socket.assigns.current_scope.user.email
     else
       "Anonymous User"
     end
