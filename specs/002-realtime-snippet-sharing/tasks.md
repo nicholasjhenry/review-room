@@ -149,12 +149,12 @@
 
 ### Tests for User Story 2 (MANDATORY - Test-First) ⚠️
 
-- [ ] T025 [P] [US2] PresenceTracker tests in test/review_room/snippets/presence_tracker_test.exs
+- [X] T025 [P] [US2] PresenceTracker tests in test/review_room/snippets/presence_tracker_test.exs
   - Test track_user/3 adds user to topic
   - Test update_cursor/3 updates metadata
   - Test list/1 returns tracked presences
   - Test automatic cleanup on process death
-- [ ] T026 [P] [US2] LiveView cursor collaboration tests in test/review_room_web/live/snippet_live/show_test.exs
+- [X] T026 [P] [US2] LiveView cursor collaboration tests in test/review_room_web/live/snippet_live/show_test.exs
   - Test cursor_moved event updates tracker
   - Test text_selected event updates tracker
   - Test selection_cleared event clears selection
@@ -163,13 +163,13 @@
 
 ### Implementation for User Story 2
 
-- [ ] T027 [US2] Implement PresenceTracker in lib/review_room/snippets/presence_tracker.ex
+- [X] T027 [US2] Implement PresenceTracker in lib/review_room/snippets/presence_tracker.ex
   - use Phoenix.Tracker
   - start_link/1, init/1, handle_diff/2 callbacks
   - track_user/3 function
   - update_cursor/3 function
   - PubSub.broadcast on diff changes
-- [ ] T028 [US2] Update SnippetLive.Show for cursor tracking in lib/review_room_web/live/snippet_live/show.ex
+- [X] T028 [US2] Update SnippetLive.Show for cursor tracking in lib/review_room_web/live/snippet_live/show.ex
   - Subscribe to "snippet:#{id}" topic in mount/3 (if connected)
   - Track user presence with PresenceTracker.track_user/3
   - Add @presences assign
@@ -177,7 +177,7 @@
   - handle_event("text_selected", %{"start" => ..., "end" => ...})
   - handle*event("selection_cleared", *)
   - handle_info({:presence_diff, diff}, socket) to merge presences
-- [ ] T029 [P] [US2] Create CursorTracker hook in assets/js/hooks/cursor_tracker.js
+- [X] T029 [P] [US2] Create CursorTracker hook in assets/js/hooks/cursor_tracker.js
   - mousemove listener with throttle (100ms)
   - mouseup listener for selection
   - pushEvent("cursor_moved", {line, column})
@@ -185,10 +185,10 @@
   - pushEvent("selection_cleared", {})
   - getLineColumn(event) helper
   - getSelectionRange(selection) helper
-- [ ] T030 [P] [US2] Register CursorTracker hook in assets/js/app.js
-- [ ] T031 [US2] Add cursor tracking div to Show template with phx-hook="CursorTracker"
+- [X] T030 [P] [US2] Register CursorTracker hook in assets/js/app.js
+- [X] T031 [US2] Add cursor tracking div to Show template with phx-hook="CursorTracker"
 
-**Checkpoint**: Real-time cursor/selection sharing works between multiple viewers
+**Checkpoint**: ✅ Real-time cursor/selection sharing works between multiple viewers
 
 ---
 

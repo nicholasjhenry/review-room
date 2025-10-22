@@ -48,10 +48,10 @@ defmodule ReviewRoom.Snippets.PresenceTracker do
   ## Examples
 
       iex> track_user("snippet123", "user_abc", %{cursor: nil, display_name: "Alice"})
-      {:ok, "user_abc"}
+      {:ok, ref}
 
   """
-  @spec track_user(String.t(), String.t(), map()) :: {:ok, String.t()} | {:error, term()}
+  @spec track_user(String.t(), String.t(), map()) :: {:ok, binary()} | {:error, term()}
   def track_user(snippet_id, user_id, user_meta) do
     Phoenix.Tracker.track(__MODULE__, self(), topic(snippet_id), user_id, user_meta)
   end
@@ -62,16 +62,18 @@ defmodule ReviewRoom.Snippets.PresenceTracker do
   ## Examples
 
       iex> update_cursor("snippet123", "user_abc", %{cursor: %{line: 10, column: 5}})
-      {:ok, "user_abc"}
+      {:ok, ref}
 
   """
-  @spec update_cursor(String.t(), String.t(), map()) :: {:ok, String.t()} | {:error, term()}
+  @spec update_cursor(String.t(), String.t(), map()) :: {:ok, binary()} | {:error, term()}
   def update_cursor(snippet_id, user_id, cursor_meta) do
     Phoenix.Tracker.update(__MODULE__, self(), topic(snippet_id), user_id, cursor_meta)
   end
 
   @doc """
   Lists all users currently viewing a snippet.
+
+  Returns a map where keys are user IDs and values contain metadata lists.
 
   ## Examples
 
@@ -81,7 +83,11 @@ defmodule ReviewRoom.Snippets.PresenceTracker do
   """
   @spec list_presences(String.t()) :: map()
   def list_presences(snippet_id) do
-    Phoenix.Tracker.list(__MODULE__, topic(snippet_id))
+    __MODULE__
+    |> Phoenix.Tracker.list(topic(snippet_id))
+    |> Enum.into(%{}, fn {user_id, meta} ->
+      {user_id, %{metas: [meta]}}
+    end)
   end
 
   defp topic(snippet_id), do: "snippet:#{snippet_id}"
