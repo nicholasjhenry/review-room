@@ -28,6 +28,7 @@ import topbar from "../vendor/topbar";
 import hljs from "highlight.js";
 // Import custom LiveView hooks
 import { SyntaxHighlight } from "./hooks/syntax_highlight";
+import CursorTracker from "./hooks/cursor_tracker";
 
 // Make hljs globally available for LiveView hooks
 window.hljs = hljs;
@@ -36,7 +37,7 @@ const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: { _csrf_token: csrfToken },
-  hooks: { ...colocatedHooks, SyntaxHighlight },
+  hooks: { ...colocatedHooks, SyntaxHighlight, CursorTracker },
 });
 
 // Show progress bar on live navigation and form submits
