@@ -21,6 +21,13 @@ defmodule ReviewRoomWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+
+    # Public snippet routes (no auth required)
+    live_session :public_snippets,
+      on_mount: [{ReviewRoomWeb.UserAuth, :mount_current_scope}] do
+      live "/s/:id", SnippetLive.Show, :show
+      live "/snippets/new", SnippetLive.New, :new
+    end
   end
 
   # Other scopes may use custom stacks.

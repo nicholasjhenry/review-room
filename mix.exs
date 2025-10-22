@@ -67,7 +67,8 @@ defmodule ReviewRoom.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.2.0"},
       {:bandit, "~> 1.5"},
-      {:tidewave, "~> 0.1", only: [:dev]}
+      {:tidewave, "~> 0.1", only: [:dev]},
+      {:nanoid, "~> 2.0"}
     ]
   end
 
