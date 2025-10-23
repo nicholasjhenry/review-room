@@ -97,4 +97,57 @@ defmodule ReviewRoom.SnippetsTest do
       assert changeset.changes.title == "New Title"
     end
   end
+
+  describe "authorization and management" do
+    setup do
+      owner = user_fixture()
+      other_user = user_fixture()
+      {:ok, owner: owner, other_user: other_user}
+    end
+
+    test "update_snippet/3 allows owner", %{owner: owner} do
+      snippet = snippet_fixture_with_user(owner)
+
+      assert {:ok, %Snippet{} = updated} =
+               Snippets.update_snippet(snippet, %{title: "Updated"}, owner)
+
+      assert updated.title == "Updated"
+      assert Snippets.get_snippet!(snippet.id).title == "Updated"
+    end
+
+    test "update_snippet/3 blocks non-owner", %{owner: owner, other_user: other_user} do
+      snippet = snippet_fixture_with_user(owner)
+
+      assert {:error, :unauthorized} =
+               Snippets.update_snippet(snippet, %{title: "Updated"}, other_user)
+
+      assert Snippets.get_snippet!(snippet.id).title == snippet.title
+    end
+
+    test "delete_snippet/2 allows owner", %{owner: owner} do
+      snippet = snippet_fixture_with_user(owner)
+
+      assert {:ok, %Snippet{}} = Snippets.delete_snippet(snippet, owner)
+      assert_raise Ecto.NoResultsError, fn -> Snippets.get_snippet!(snippet.id) end
+    end
+
+    test "delete_snippet/2 blocks non-owner", %{owner: owner, other_user: other_user} do
+      snippet = snippet_fixture_with_user(owner)
+
+      assert {:error, :unauthorized} = Snippets.delete_snippet(snippet, other_user)
+      assert Snippets.get_snippet!(snippet.id)
+    end
+
+    test "list_user_snippets/2 returns only user's snippets", %{
+      owner: owner,
+      other_user: other_user
+    } do
+      owner_snippet = snippet_fixture_with_user(owner, %{title: "Owner Snippet"})
+      snippet_fixture_with_user(other_user, %{title: "Other Snippet"})
+
+      results = Snippets.list_user_snippets(owner.id, limit: 10)
+
+      assert Enum.map(results, & &1.id) == [owner_snippet.id]
+    end
+  end
 end
