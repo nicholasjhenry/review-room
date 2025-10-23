@@ -302,32 +302,32 @@
 
 ### Tests for User Story 5 (MANDATORY - Test-First) ⚠️
 
-- [ ] T047 [P] [US5] Anonymous creation tests in test/review_room_web/live/snippet_live/new_test.exs
+- [x] T047 [P] [US5] Anonymous creation tests in test/review_room_web/live/snippet_live/new_test.exs
   - Test unauthenticated user can create snippet
   - Test snippet.user_id is nil for anonymous
-- [ ] T048 [P] [US5] Identity tests in test/review_room_web/live/snippet_live/show_test.exs
+- [x] T048 [P] [US5] Identity tests in test/review_room_web/live/snippet_live/show_test.exs
   - Test anonymous user shows as "Anonymous User {N}"
   - Test authenticated user shows email/name
   - Test anonymous snippets cannot be edited
 
 ### Implementation for User Story 5
 
-- [ ] T049 [US5] Update SnippetLive.New for anonymous users in lib/review_room_web/live/snippet_live/new.ex
+- [x] T049 [US5] Update SnippetLive.New for anonymous users in lib/review_room_web/live/snippet_live/new.ex
   - Pass current_user (may be nil) to create_snippet/2
   - Handle both authenticated and anonymous sessions
-- [ ] T050 [US5] Update context create_snippet/2 in lib/review_room/snippets.ex
+- [x] T050 [US5] Update context create_snippet/2 in lib/review_room/snippets.ex
   - Accept user parameter (User struct or nil)
   - Set user_id only if user provided
   - Anonymous snippets have user_id = nil
-- [ ] T051 [US5] Update presence display names in lib/review_room_web/live/snippet_live/show.ex
+- [x] T051 [US5] Update presence display names in lib/review_room_web/live/snippet_live/show.ex
   - For authenticated: use user.email or user name
   - For anonymous: generate "Anonymous User #{unique_id}"
   - Use session ID for anonymous identity tracking
-- [ ] T052 [US5] Update authorization helpers in lib/review_room/snippets.ex
+- [x] T052 [US5] Update authorization helpers in lib/review_room/snippets.ex
   - can_edit?/2 returns false if snippet.user_id is nil
   - can_delete?/2 returns false if snippet.user_id is nil
   - Only owned snippets (non-nil user_id) can be managed
-- [ ] T053 [US5] Move /snippets/new route to public scope in lib/review_room_web/router.ex
+- [x] T053 [US5] Move /snippets/new route to public scope in lib/review_room_web/router.ex
   - Allow unauthenticated access to creation page
 
 **Checkpoint**: Anonymous and authenticated workflows both supported
