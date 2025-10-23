@@ -25,7 +25,7 @@ defmodule ReviewRoom.Snippets do
     create_snippet(nil, attrs)
   end
 
-  @spec create_snippet(Scope.t() | nil, map()) ::
+  @spec create_snippet(Scope.t() | User.t() | nil, map()) ::
           {:ok, Snippet.t()} | {:error, Ecto.Changeset.t()}
   def create_snippet(scope, attrs) when is_map(attrs) do
     %Snippet{}

@@ -133,13 +133,46 @@ defmodule ReviewRoomWeb.SnippetLive.ShowTest do
       assert html =~ user.email
     end
 
-    test "anonymous user shows generic name", %{conn: conn} do
+    test "anonymous users are assigned numbered display names", %{conn: conn} do
       snippet = snippet_fixture(%{code: "test code"})
 
-      {:ok, view, _html} = live(conn, ~p"/s/#{snippet.id}")
+      {:ok, view1, _html} = live(conn, ~p"/s/#{snippet.id}")
 
-      html = render(view)
-      assert html =~ "Anonymous User"
+      assert_eventually(
+        fn ->
+          presences = ReviewRoom.Snippets.PresenceTracker.list_presences(snippet.id)
+
+          names =
+            presences
+            |> Map.values()
+            |> Enum.map(fn %{metas: [meta]} -> meta.display_name end)
+
+          Enum.member?(names, "Anonymous User 1")
+        end,
+        timeout: 1000,
+        interval: 50
+      )
+
+      {:ok, view2, _html} = live(conn, ~p"/s/#{snippet.id}")
+
+      assert_eventually(
+        fn ->
+          presences = ReviewRoom.Snippets.PresenceTracker.list_presences(snippet.id)
+
+          names =
+            presences
+            |> Map.values()
+            |> Enum.map(fn %{metas: [meta]} -> meta.display_name end)
+            |> Enum.sort()
+
+          names == ["Anonymous User 1", "Anonymous User 2"]
+        end,
+        timeout: 2000,
+        interval: 50
+      )
+
+      GenServer.stop(view1.pid, :normal)
+      GenServer.stop(view2.pid, :normal)
     end
 
     test "user leaves, presence list updates within 5 seconds", %{conn: conn} do
@@ -196,6 +229,15 @@ defmodule ReviewRoomWeb.SnippetLive.ShowTest do
       [user_id] = Map.keys(presences)
       [meta] = presences[user_id].metas
       assert meta.cursor == %{line: 5, column: 10}
+    end
+
+    test "anonymous snippets cannot be edited", %{conn: conn} do
+      user = user_fixture()
+      snippet = snippet_fixture(%{code: "test code"})
+
+      {:ok, view, _html} = conn |> log_in_user(user) |> live(~p"/s/#{snippet.id}")
+
+      refute has_element?(view, "a[href='#{~p"/s/#{snippet.id}/edit"}']")
     end
   end
 

@@ -6,6 +6,8 @@ defmodule ReviewRoomWeb.SnippetLive.NewTest do
   import ReviewRoom.AccountsFixtures
 
   alias ReviewRoom.Snippets
+  alias ReviewRoom.Snippets.Snippet
+  alias ReviewRoom.Repo
 
   describe "New snippet page" do
     test "mount displays form", %{conn: conn} do
@@ -46,14 +48,15 @@ defmodule ReviewRoomWeb.SnippetLive.NewTest do
 
     test "save event creates snippet and redirects on valid data", %{conn: conn} do
       {:ok, view, _html} = live(conn, ~p"/snippets/new")
+      title = "Hello Function #{System.unique_integer([:positive])}"
 
       # Submit valid snippet
-      {:ok, _view, html} =
+      {:ok, _show_view, html} =
         view
         |> form("#snippet-form",
           snippet: %{
             code: "def hello, do: :world",
-            title: "Hello Function",
+            title: title,
             language: "elixir"
           }
         )
@@ -63,6 +66,11 @@ defmodule ReviewRoomWeb.SnippetLive.NewTest do
       # Should redirect to show page
       assert html =~ "def hello, do: :world"
       assert html =~ "Hello Function"
+
+      # Snippet created anonymously should not have an owner
+      snippet = Repo.get_by!(Snippet, title: title)
+      assert snippet.user_id == nil
+      assert Snippets.get_snippet!(snippet.id).user_id == nil
     end
 
     test "save event shows validation errors on invalid data", %{conn: conn} do
@@ -119,6 +127,27 @@ defmodule ReviewRoomWeb.SnippetLive.NewTest do
 
       snippets = Snippets.list_user_snippets(Scope.for_user(user), limit: 5)
       assert Enum.any?(snippets, &(&1.title == "Owned Snippet"))
+    end
+
+    test "anonymous snippet creation leaves snippet without user ownership", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/snippets/new")
+      title = "Anonymous Snippet #{System.unique_integer([:positive])}"
+
+      {:ok, _show_view, _html} =
+        view
+        |> form("#snippet-form",
+          snippet: %{
+            code: "IO.puts(\"hi\")",
+            title: title,
+            language: "elixir"
+          }
+        )
+        |> render_submit()
+        |> follow_redirect(conn)
+
+      snippet = Repo.get_by!(Snippet, title: title)
+      assert snippet.user_id == nil
+      assert Snippets.get_snippet!(snippet.id).user_id == nil
     end
   end
 end

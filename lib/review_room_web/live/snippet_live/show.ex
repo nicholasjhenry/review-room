@@ -1,6 +1,7 @@
 defmodule ReviewRoomWeb.SnippetLive.Show do
   use ReviewRoomWeb, :live_view
 
+  alias ReviewRoom.Accounts.User
   alias ReviewRoom.Snippets
   alias ReviewRoom.Snippets.PresenceTracker
 
@@ -27,13 +28,15 @@ defmodule ReviewRoomWeb.SnippetLive.Show do
         Phoenix.PubSub.subscribe(ReviewRoom.PubSub, "snippet:#{id}")
 
         # Track this user's presence
+        presences_before = PresenceTracker.list_presences(id)
         user_id = get_user_id(socket, session)
-        display_name = get_display_name(socket)
+        identity = build_presence_identity(socket, user_id, presences_before)
         color = assign_random_color()
 
         {:ok, _ref} =
           PresenceTracker.track_user(id, user_id, %{
-            display_name: display_name,
+            display_name: identity.display_name,
+            anonymous_number: identity.anonymous_number,
             color: color,
             cursor: nil,
             selection: nil
@@ -330,13 +333,78 @@ defmodule ReviewRoomWeb.SnippetLive.Show do
     end
   end
 
-  defp get_display_name(socket) do
-    if socket.assigns.current_user do
-      socket.assigns.current_user.email
-    else
-      "Anonymous User"
+  defp build_presence_identity(socket, user_id, presences) do
+    case socket.assigns.current_user do
+      %User{} = user ->
+        %{display_name: user_display_name(user), anonymous_number: nil}
+
+      _ ->
+        anonymous_presence_identity(user_id, presences)
     end
   end
+
+  defp user_display_name(%User{email: email}) when is_binary(email), do: email
+  defp user_display_name(_user), do: "User"
+
+  defp anonymous_presence_identity(user_id, presences) do
+    case Map.get(presences, user_id) do
+      %{metas: [meta | _]} ->
+        %{
+          display_name: meta[:display_name] || anonymous_label(presences),
+          anonymous_number: extract_anonymous_number(meta)
+        }
+
+      _ ->
+        number = next_available_anonymous_number(presences)
+
+        %{
+          display_name: "Anonymous User #{number}",
+          anonymous_number: number
+        }
+    end
+  end
+
+  defp anonymous_label(presences) do
+    number = next_available_anonymous_number(presences)
+    "Anonymous User #{number}"
+  end
+
+  defp next_available_anonymous_number(presences) do
+    used_numbers =
+      presences
+      |> Map.values()
+      |> Enum.flat_map(fn %{metas: metas} -> metas end)
+      |> Enum.map(&extract_anonymous_number/1)
+      |> Enum.filter(&is_integer/1)
+      |> MapSet.new()
+
+    Stream.iterate(1, &(&1 + 1))
+    |> Enum.find(fn number -> not MapSet.member?(used_numbers, number) end)
+  end
+
+  defp extract_anonymous_number(meta) when is_map(meta) do
+    cond do
+      is_integer(meta[:anonymous_number]) ->
+        meta[:anonymous_number]
+
+      is_binary(meta[:display_name]) ->
+        case meta[:display_name] do
+          "Anonymous User " <> rest ->
+            case Integer.parse(rest) do
+              {number, ""} -> number
+              _ -> nil
+            end
+
+          _ ->
+            nil
+        end
+
+      true ->
+        nil
+    end
+  end
+
+  defp extract_anonymous_number(_), do: nil
 
   defp current_user(socket) do
     case socket.assigns[:current_scope] do
