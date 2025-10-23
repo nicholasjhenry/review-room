@@ -342,12 +342,12 @@
 
 ### Tests for User Story 6 (MANDATORY - Test-First) ⚠️
 
-- [ ] T054 [P] [US6] Context gallery tests in test/review_room/snippets_test.exs
+- [x] T054 [P] [US6] Context gallery tests in test/review_room/snippets_test.exs
   - Test list_public_snippets/1 returns only public snippets
   - Test list_public_snippets with language filter
   - Test list_public_snippets with cursor pagination
   - Test search_snippets/2 matches title and description
-- [ ] T055 [P] [US6] LiveView gallery tests in test/review_room_web/live/snippet_live/index_test.exs
+- [x] T055 [P] [US6] LiveView gallery tests in test/review_room_web/live/snippet_live/index_test.exs
   - Test mount loads public snippets as stream
   - Test filter event resets stream with filtered results
   - Test search event resets stream with search results
@@ -356,14 +356,14 @@
 
 ### Implementation for User Story 6
 
-- [ ] T056 [US6] Add gallery context functions to lib/review_room/snippets.ex
+- [x] T056 [US6] Add gallery context functions to lib/review_room/snippets.ex
   - list_public_snippets/1 (opts: language, cursor, limit)
   - search_snippets/2 (query_string, opts)
   - Query with WHERE visibility = :public
   - ILIKE search on title and description
   - Cursor-based pagination using inserted_at
   - Preload :user for display
-- [ ] T057 [US6] Create SnippetLive.Index in lib/review_room_web/live/snippet_live/index.ex
+- [x] T057 [US6] Create SnippetLive.Index in lib/review_room_web/live/snippet_live/index.ex
   - mount/3 initializes empty stream
   - Load first 20 snippets on connected?/1
   - stream(socket, :snippets, snippets)
@@ -371,7 +371,7 @@
   - handle_event("filter", %{"language" => lang}) with reset: true
   - handle_event("search", %{"query" => q}) with reset: true
   - handle*event("clear_search", *) resets to all public
-- [ ] T058 [US6] Create gallery template with stream rendering
+- [x] T058 [US6] Create gallery template with stream rendering
   - div id="snippets" phx-update="stream"
   - :for={{id, snippet} <- @streams.snippets}
   - Display title, language, created_at, author
@@ -379,14 +379,14 @@
   - Filter dropdown for languages
   - Search form
   - "Load More" button with cursor
-- [ ] T059 [US6] Update UserSnippetLive.Index to support visibility toggle in lib/review_room_web/live/user_snippet_live/index.ex
+- [x] T059 [US6] Update UserSnippetLive.Index to support visibility toggle in lib/review_room_web/live/user_snippet_live/index.ex
   - handle_event("toggle_visibility", %{"id" => id})
   - Call toggle_visibility/2 context function
   - Update stream with stream_insert/3
   - Show flash message on toggle
-- [ ] T060 [US6] Add gallery route to lib/review_room_web/router.ex
+- [x] T060 [US6] Add gallery route to lib/review_room_web/router.ex
   - Public: live "/snippets", SnippetLive.Index, :index
-- [ ] T061 [US6] Add navigation link to gallery in layouts template
+- [x] T061 [US6] Add navigation link to gallery in layouts template
   - Link in header/nav to browse public snippets
 
 **Checkpoint**: Public gallery complete - users can discover, search, and filter snippets

@@ -35,36 +35,65 @@ defmodule ReviewRoomWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <header class="navbar px-4 sm:px-6 lg:px-8">
-      <div class="flex-1">
-        <a href="/" class="flex-1 flex w-fit items-center gap-2">
-          <img src={~p"/images/logo.svg"} width="36" />
-          <span class="text-sm font-semibold">v{Application.spec(:phoenix, :vsn)}</span>
-        </a>
-      </div>
-      <div class="flex-none">
-        <ul class="flex flex-column px-1 space-x-4 items-center">
-          <li>
-            <a href="https://phoenixframework.org/" class="btn btn-ghost">Website</a>
-          </li>
-          <li>
-            <a href="https://github.com/phoenixframework/phoenix" class="btn btn-ghost">GitHub</a>
-          </li>
-          <li>
-            <.theme_toggle />
-          </li>
-          <li>
-            <a href="https://hexdocs.pm/phoenix/overview.html" class="btn btn-primary">
-              Get Started <span aria-hidden="true">&rarr;</span>
-            </a>
-          </li>
-        </ul>
+    <header class="border-b border-slate-200 bg-white/80 backdrop-blur">
+      <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+        <div class="flex items-center gap-8">
+          <.link navigate={~p"/"} class="flex items-center gap-2 text-slate-900">
+            <img src={~p"/images/logo.svg"} width="36" alt="ReviewRoom logo" />
+            <span class="text-lg font-semibold">ReviewRoom</span>
+          </.link>
+
+          <nav class="hidden items-center gap-6 text-sm text-slate-600 md:flex">
+            <.link
+              navigate={~p"/snippets"}
+              class="transition hover:text-slate-900"
+            >
+              Discover
+            </.link>
+            <.link
+              navigate={~p"/snippets/new"}
+              class="transition hover:text-slate-900"
+            >
+              Share Snippet
+            </.link>
+            <.link
+              :if={@current_scope && @current_scope.user}
+              navigate={~p"/snippets/my"}
+              class="transition hover:text-slate-900"
+            >
+              My Snippets
+            </.link>
+          </nav>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <.theme_toggle />
+
+          <.link
+            :if={!@current_scope || is_nil(@current_scope.user)}
+            navigate={~p"/users/log-in"}
+            class="hidden rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:text-slate-800 md:inline-flex"
+          >
+            Sign in
+          </.link>
+
+          <.link
+            :if={@current_scope && @current_scope.user}
+            navigate={~p"/users/log-out"}
+            method="delete"
+            class="hidden rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:text-slate-800 md:inline-flex"
+          >
+            Sign out
+          </.link>
+        </div>
       </div>
     </header>
 
-    <main class="px-4 py-20 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-2xl space-y-4">
-        {render_slot(@inner_block)}
+    <main class="bg-slate-50">
+      <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+        <div class="space-y-6">
+          {render_slot(@inner_block)}
+        </div>
       </div>
     </main>
 

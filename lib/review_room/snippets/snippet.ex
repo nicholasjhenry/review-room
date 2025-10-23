@@ -18,6 +18,37 @@ defmodule ReviewRoom.Snippets.Snippet do
   @primary_key {:id, :string, autogenerate: false}
   @foreign_key_type :binary_id
 
+  @supported_languages [
+    nil,
+    "elixir",
+    "erlang",
+    "javascript",
+    "typescript",
+    "python",
+    "ruby",
+    "go",
+    "rust",
+    "java",
+    "kotlin",
+    "swift",
+    "c",
+    "cpp",
+    "csharp",
+    "php",
+    "sql",
+    "html",
+    "css",
+    "scss",
+    "json",
+    "yaml",
+    "markdown",
+    "shell",
+    "bash",
+    "dockerfile",
+    "xml",
+    "plaintext"
+  ]
+
   schema "snippets" do
     field :code, :string
     field :title, :string
@@ -70,36 +101,7 @@ defmodule ReviewRoom.Snippets.Snippet do
   defp put_user(changeset, nil), do: changeset
   defp put_user(changeset, user), do: put_assoc(changeset, :user, user)
 
-  defp supported_languages do
-    [
-      nil,
-      "elixir",
-      "erlang",
-      "javascript",
-      "typescript",
-      "python",
-      "ruby",
-      "go",
-      "rust",
-      "java",
-      "kotlin",
-      "swift",
-      "c",
-      "cpp",
-      "csharp",
-      "php",
-      "sql",
-      "html",
-      "css",
-      "scss",
-      "json",
-      "yaml",
-      "markdown",
-      "shell",
-      "bash",
-      "dockerfile",
-      "xml",
-      "plaintext"
-    ]
-  end
+  @doc "Supported language identifiers for snippets."
+  @spec supported_languages() :: [String.t() | nil]
+  def supported_languages, do: @supported_languages
 end
