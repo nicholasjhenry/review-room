@@ -59,6 +59,8 @@ defmodule ReviewRoom.Snippets.PresenceTracker do
   @doc """
   Updates cursor position for a user in a snippet session.
 
+  Merges the new cursor metadata with existing metadata to preserve display_name and color.
+
   ## Examples
 
       iex> update_cursor("snippet123", "user_abc", %{cursor: %{line: 10, column: 5}})
@@ -67,7 +69,9 @@ defmodule ReviewRoom.Snippets.PresenceTracker do
   """
   @spec update_cursor(String.t(), String.t(), map()) :: {:ok, binary()} | {:error, term()}
   def update_cursor(snippet_id, user_id, cursor_meta) do
-    Phoenix.Tracker.update(__MODULE__, self(), topic(snippet_id), user_id, cursor_meta)
+    Phoenix.Tracker.update(__MODULE__, self(), topic(snippet_id), user_id, fn existing_meta ->
+      Map.merge(existing_meta, cursor_meta)
+    end)
   end
 
   @doc """
