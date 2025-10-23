@@ -11,7 +11,6 @@ defmodule ReviewRoomWeb.SnippetLive.New do
 
     {:ok,
      socket
-     |> assign(:current_user, current_user(socket))
      |> assign(:snippet, %Snippet{})
      |> assign(:form, to_form(changeset))}
   end
@@ -28,9 +27,7 @@ defmodule ReviewRoomWeb.SnippetLive.New do
 
   @impl true
   def handle_event("save", %{"snippet" => snippet_params}, socket) do
-    current_user = socket.assigns.current_user
-
-    case Snippets.create_snippet(snippet_params, current_user) do
+    case Snippets.create_snippet(socket.assigns[:current_scope], snippet_params) do
       {:ok, snippet} ->
         {:noreply,
          socket
@@ -58,12 +55,5 @@ defmodule ReviewRoomWeb.SnippetLive.New do
       />
     </Layouts.app>
     """
-  end
-
-  defp current_user(socket) do
-    case socket.assigns[:current_scope] do
-      %{user: user} -> user
-      _ -> nil
-    end
   end
 end

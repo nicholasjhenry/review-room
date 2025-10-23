@@ -2,6 +2,7 @@ defmodule ReviewRoomWeb.SnippetLive.NewTest do
   use ReviewRoomWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
+  alias ReviewRoom.Accounts.Scope
   import ReviewRoom.AccountsFixtures
 
   alias ReviewRoom.Snippets
@@ -116,7 +117,7 @@ defmodule ReviewRoomWeb.SnippetLive.NewTest do
         |> render_submit()
         |> follow_redirect(conn)
 
-      snippets = Snippets.list_user_snippets(user.id, limit: 5)
+      snippets = Snippets.list_user_snippets(Scope.for_user(user), limit: 5)
       assert Enum.any?(snippets, &(&1.title == "Owned Snippet"))
     end
   end

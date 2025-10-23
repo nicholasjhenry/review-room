@@ -4,20 +4,22 @@ defmodule ReviewRoom.SnippetsFixtures do
   entities via the `ReviewRoom.Snippets` context.
   """
 
+  alias ReviewRoom.Accounts.Scope
+
   @doc """
   Generate a snippet.
   """
   def snippet_fixture(attrs \\ %{}) do
-    {:ok, snippet} =
-      attrs
-      |> Enum.into(%{
+    attrs =
+      Enum.into(attrs, %{
         code: "def hello, do: :world",
         title: "Example Snippet",
         description: "A test snippet",
         language: "elixir",
         visibility: :private
       })
-      |> ReviewRoom.Snippets.create_snippet()
+
+    {:ok, snippet} = ReviewRoom.Snippets.create_snippet(attrs)
 
     snippet
   end
@@ -26,16 +28,16 @@ defmodule ReviewRoom.SnippetsFixtures do
   Generate a snippet with a specific user.
   """
   def snippet_fixture_with_user(user, attrs \\ %{}) do
-    {:ok, snippet} =
-      attrs
-      |> Enum.into(%{
+    attrs =
+      Enum.into(attrs, %{
         code: "def hello, do: :world",
         title: "Example Snippet",
         description: "A test snippet",
         language: "elixir",
         visibility: :private
       })
-      |> ReviewRoom.Snippets.create_snippet(user)
+
+    {:ok, snippet} = ReviewRoom.Snippets.create_snippet(Scope.for_user(user), attrs)
 
     snippet
   end

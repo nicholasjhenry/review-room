@@ -7,7 +7,7 @@ defmodule ReviewRoomWeb.SnippetLive.Show do
   @impl true
   def mount(%{"id" => id}, session, socket) do
     snippet = Snippets.get_snippet!(id)
-
+    scope = socket.assigns[:current_scope]
     current_user = current_user(socket)
 
     socket =
@@ -18,7 +18,7 @@ defmodule ReviewRoomWeb.SnippetLive.Show do
         presences: %{},
         user_id: nil,
         current_user: current_user,
-        can_edit?: Snippets.can_edit?(snippet, current_user)
+        can_edit?: Snippets.can_edit?(scope, snippet)
       )
 
     socket =
@@ -286,7 +286,7 @@ defmodule ReviewRoomWeb.SnippetLive.Show do
   def handle_info({:snippet_updated, %{id: snippet_id}}, socket) do
     if socket.assigns.snippet.id == snippet_id do
       snippet = Snippets.get_snippet!(snippet_id)
-      can_edit? = Snippets.can_edit?(snippet, socket.assigns.current_user)
+      can_edit? = Snippets.can_edit?(socket.assigns[:current_scope], snippet)
 
       {:noreply, assign(socket, snippet: snippet, can_edit?: can_edit?)}
     else

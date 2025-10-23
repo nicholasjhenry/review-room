@@ -9,15 +9,14 @@ defmodule ReviewRoomWeb.SnippetLive.Edit do
   @impl true
   def mount(%{"id" => id}, _session, socket) do
     snippet = Snippets.get_snippet!(id)
-    current_user = current_user(socket)
+    scope = socket.assigns[:current_scope]
 
-    if Snippets.can_edit?(snippet, current_user) do
+    if Snippets.can_edit?(scope, snippet) do
       changeset = Snippet.update_changeset(snippet, %{})
 
       {:ok,
        socket
        |> assign(:snippet, snippet)
-       |> assign(:current_user, current_user)
        |> assign(:page_title, "Edit Snippet")
        |> assign(:form, to_form(changeset))}
     else
@@ -41,9 +40,9 @@ defmodule ReviewRoomWeb.SnippetLive.Edit do
   @impl true
   def handle_event("save", %{"snippet" => snippet_params}, socket) do
     snippet = socket.assigns.snippet
-    current_user = socket.assigns.current_user
+    scope = socket.assigns[:current_scope]
 
-    case Snippets.update_snippet(snippet, snippet_params, current_user) do
+    case Snippets.update_snippet(scope, snippet, snippet_params) do
       {:ok, updated} ->
         PubSub.broadcast(
           ReviewRoom.PubSub,
@@ -71,9 +70,9 @@ defmodule ReviewRoomWeb.SnippetLive.Edit do
   @impl true
   def handle_event("delete", _params, socket) do
     snippet = socket.assigns.snippet
-    current_user = socket.assigns.current_user
+    scope = socket.assigns[:current_scope]
 
-    case Snippets.delete_snippet(snippet, current_user) do
+    case Snippets.delete_snippet(scope, snippet) do
       {:ok, deleted} ->
         PubSub.broadcast(
           ReviewRoom.PubSub,
@@ -114,12 +113,5 @@ defmodule ReviewRoomWeb.SnippetLive.Edit do
       />
     </Layouts.app>
     """
-  end
-
-  defp current_user(socket) do
-    case socket.assigns[:current_scope] do
-      %{user: user} -> user
-      _ -> nil
-    end
   end
 end

@@ -7,7 +7,8 @@ defmodule ReviewRoomWeb.UserSnippetLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    user = current_user(socket)
+    scope = socket.assigns[:current_scope]
+    user = scope && scope.user
 
     if is_nil(user) do
       {:ok,
@@ -15,7 +16,7 @@ defmodule ReviewRoomWeb.UserSnippetLive.Index do
        |> put_flash(:error, "You must be signed in to view your snippets.")
        |> redirect(to: ~p"/users/log-in")}
     else
-      snippets = Snippets.list_user_snippets(user.id)
+      snippets = Snippets.list_user_snippets(scope)
 
       {:ok,
        socket
@@ -27,8 +28,10 @@ defmodule ReviewRoomWeb.UserSnippetLive.Index do
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
+    scope = socket.assigns[:current_scope]
+
     with %Snippet{} = snippet <- Snippets.get_snippet!(id),
-         {:ok, deleted} <- Snippets.delete_snippet(snippet, socket.assigns.user) do
+         {:ok, deleted} <- Snippets.delete_snippet(scope, snippet) do
       PubSub.broadcast(
         ReviewRoom.PubSub,
         "snippet:#{deleted.id}",
@@ -49,9 +52,10 @@ defmodule ReviewRoomWeb.UserSnippetLive.Index do
 
   @impl true
   def handle_event("toggle_visibility", %{"id" => id}, socket) do
+    scope = socket.assigns[:current_scope]
     snippet = Snippets.get_snippet!(id)
 
-    case Snippets.toggle_visibility(snippet, socket.assigns.user) do
+    case Snippets.toggle_visibility(scope, snippet) do
       {:ok, updated} ->
         PubSub.broadcast(
           ReviewRoom.PubSub,
@@ -190,13 +194,6 @@ defmodule ReviewRoomWeb.UserSnippetLive.Index do
       </div>
     </Layouts.app>
     """
-  end
-
-  defp current_user(socket) do
-    case socket.assigns[:current_scope] do
-      %{user: user} -> user
-      _ -> nil
-    end
   end
 
   defp format_timestamp(nil), do: "moments ago"
