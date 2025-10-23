@@ -3,6 +3,31 @@ defmodule ReviewRoomWeb.SnippetLive.ShowTest do
 
   import Phoenix.LiveViewTest
   import ReviewRoom.SnippetsFixtures
+  import ReviewRoom.AccountsFixtures
+
+  # Helper for polling assertions with timeout
+  defp assert_eventually(assertion_fn, opts) do
+    timeout = Keyword.get(opts, :timeout, 5000)
+    interval = Keyword.get(opts, :interval, 100)
+    deadline = System.monotonic_time(:millisecond) + timeout
+
+    poll_until(assertion_fn, deadline, interval)
+  end
+
+  defp poll_until(assertion_fn, deadline, interval) do
+    if assertion_fn.() do
+      :ok
+    else
+      now = System.monotonic_time(:millisecond)
+
+      if now >= deadline do
+        flunk("Assertion did not become true within timeout")
+      else
+        Process.sleep(interval)
+        poll_until(assertion_fn, deadline, interval)
+      end
+    end
+  end
 
   describe "Show snippet page" do
     test "mount loads snippet by ID", %{conn: conn} do
@@ -81,6 +106,96 @@ defmodule ReviewRoomWeb.SnippetLive.ShowTest do
       assert view
              |> element("#code-display")
              |> render() =~ "phx-update=\"ignore\""
+    end
+  end
+
+  describe "User Presence Awareness (Phase 5)" do
+    test "presence list displays viewer count", %{conn: conn} do
+      snippet = snippet_fixture(%{code: "test code"})
+
+      {:ok, view, _html} = live(conn, ~p"/s/#{snippet.id}")
+
+      # Check that presence count is displayed
+      assert has_element?(view, "#presence-list")
+      html = render(view)
+      assert html =~ "Active Viewers"
+      # Should show 1 viewer (self)
+      assert html =~ "(1)"
+    end
+
+    test "authenticated user shows profile email", %{conn: conn} do
+      user = user_fixture()
+      snippet = snippet_fixture(%{code: "test code"})
+
+      {:ok, view, _html} = conn |> log_in_user(user) |> live(~p"/s/#{snippet.id}")
+
+      html = render(view)
+      assert html =~ user.email
+    end
+
+    test "anonymous user shows generic name", %{conn: conn} do
+      snippet = snippet_fixture(%{code: "test code"})
+
+      {:ok, view, _html} = live(conn, ~p"/s/#{snippet.id}")
+
+      html = render(view)
+      assert html =~ "Anonymous User"
+    end
+
+    test "user leaves, presence list updates within 5 seconds", %{conn: conn} do
+      snippet = snippet_fixture(%{code: "test code"})
+
+      # Connect two viewers
+      {:ok, _view1, _html} = live(conn, ~p"/s/#{snippet.id}")
+      {:ok, view2, _html} = live(conn, ~p"/s/#{snippet.id}")
+
+      # Verify both are present
+      :timer.sleep(50)
+      presences = ReviewRoom.Snippets.PresenceTracker.list_presences(snippet.id)
+      assert map_size(presences) == 2
+
+      # Disconnect one viewer by stopping the process
+      GenServer.stop(view2.pid, :normal)
+
+      # Poll for presence cleanup with exponential backoff (max 5 seconds)
+      assert_eventually(
+        fn ->
+          presences = ReviewRoom.Snippets.PresenceTracker.list_presences(snippet.id)
+          map_size(presences) == 1
+        end,
+        timeout: 5000,
+        interval: 100
+      )
+    end
+
+    test "cursor overlay shows username on hover", %{conn: conn} do
+      user = user_fixture()
+      snippet = snippet_fixture(%{code: "test code"})
+
+      {:ok, view, _html} = conn |> log_in_user(user) |> live(~p"/s/#{snippet.id}")
+
+      # Wait for initial presence tracking to complete
+      :timer.sleep(100)
+
+      # Check for presence overlay element with PresenceRenderer hook
+      assert has_element?(view, "#presence-overlay[phx-hook='PresenceRenderer']")
+
+      # Verify initial presence is tracked
+      html = render(view)
+      assert html =~ "data-presences"
+      assert html =~ "display_name"
+      assert html =~ user.email or html =~ "Anonymous User"
+
+      # Now simulate cursor movement to update presence
+      render_hook(view, "cursor_moved", %{"line" => 5, "column" => 10})
+      :timer.sleep(50)
+
+      # Verify cursor position is tracked
+      presences = ReviewRoom.Snippets.PresenceTracker.list_presences(snippet.id)
+      assert map_size(presences) == 1
+      [user_id] = Map.keys(presences)
+      [meta] = presences[user_id].metas
+      assert meta.cursor == %{line: 5, column: 10}
     end
   end
 

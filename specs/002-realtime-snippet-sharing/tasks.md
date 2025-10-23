@@ -149,12 +149,12 @@
 
 ### Tests for User Story 2 (MANDATORY - Test-First) ⚠️
 
-- [X] T025 [P] [US2] PresenceTracker tests in test/review_room/snippets/presence_tracker_test.exs
+- [x] T025 [P] [US2] PresenceTracker tests in test/review_room/snippets/presence_tracker_test.exs
   - Test track_user/3 adds user to topic
   - Test update_cursor/3 updates metadata
   - Test list/1 returns tracked presences
   - Test automatic cleanup on process death
-- [X] T026 [P] [US2] LiveView cursor collaboration tests in test/review_room_web/live/snippet_live/show_test.exs
+- [x] T026 [P] [US2] LiveView cursor collaboration tests in test/review_room_web/live/snippet_live/show_test.exs
   - Test cursor_moved event updates tracker
   - Test text_selected event updates tracker
   - Test selection_cleared event clears selection
@@ -163,13 +163,13 @@
 
 ### Implementation for User Story 2
 
-- [X] T027 [US2] Implement PresenceTracker in lib/review_room/snippets/presence_tracker.ex
+- [x] T027 [US2] Implement PresenceTracker in lib/review_room/snippets/presence_tracker.ex
   - use Phoenix.Tracker
   - start_link/1, init/1, handle_diff/2 callbacks
   - track_user/3 function
   - update_cursor/3 function
   - PubSub.broadcast on diff changes
-- [X] T028 [US2] Update SnippetLive.Show for cursor tracking in lib/review_room_web/live/snippet_live/show.ex
+- [x] T028 [US2] Update SnippetLive.Show for cursor tracking in lib/review_room_web/live/snippet_live/show.ex
   - Subscribe to "snippet:#{id}" topic in mount/3 (if connected)
   - Track user presence with PresenceTracker.track_user/3
   - Add @presences assign
@@ -177,7 +177,7 @@
   - handle_event("text_selected", %{"start" => ..., "end" => ...})
   - handle*event("selection_cleared", *)
   - handle_info({:presence_diff, diff}, socket) to merge presences
-- [X] T029 [P] [US2] Create CursorTracker hook in assets/js/hooks/cursor_tracker.js
+- [x] T029 [P] [US2] Create CursorTracker hook in assets/js/hooks/cursor_tracker.js
   - mousemove listener with throttle (100ms)
   - mouseup listener for selection
   - pushEvent("cursor_moved", {line, column})
@@ -185,8 +185,8 @@
   - pushEvent("selection_cleared", {})
   - getLineColumn(event) helper
   - getSelectionRange(selection) helper
-- [X] T030 [P] [US2] Register CursorTracker hook in assets/js/app.js
-- [X] T031 [US2] Add cursor tracking div to Show template with phx-hook="CursorTracker"
+- [x] T030 [P] [US2] Register CursorTracker hook in assets/js/app.js
+- [x] T031 [US2] Add cursor tracking div to Show template with phx-hook="CursorTracker"
 
 **Checkpoint**: ✅ Real-time cursor/selection sharing works between multiple viewers
 
@@ -200,7 +200,7 @@
 
 ### Tests for User Story 3 (MANDATORY - Test-First) ⚠️
 
-- [ ] T032 [P] [US3] Presence display tests in test/review_room_web/live/snippet_live/show_test.exs
+- [x] T032 [P] [US3] Presence display tests in test/review_room_web/live/snippet_live/show_test.exs
   - Test presence list displays viewer count
   - Test authenticated user shows profile name
   - Test anonymous user shows generic name
@@ -209,27 +209,27 @@
 
 ### Implementation for User Story 3
 
-- [ ] T033 [US3] Update SnippetLive.Show presence tracking in lib/review_room_web/live/snippet_live/show.ex
+- [x] T033 [US3] Update SnippetLive.Show presence tracking in lib/review_room_web/live/snippet_live/show.ex
   - Assign display_name (user.email or "Anonymous User #{session_id}")
   - Assign random color for user (assign_random_color/0 helper)
   - Include display_name and color in track_user metadata
   - Add get_user_id/2 helper (user_id or session_id)
-- [ ] T034 [P] [US3] Create PresenceRenderer hook in assets/js/hooks/presence_renderer.js
+- [x] T034 [P] [US3] Create PresenceRenderer hook in assets/js/hooks/presence_renderer.js
   - updated() callback to render cursors and selections
   - renderCursors() - create cursor divs at positions
   - renderSelections() - highlight selected ranges
   - Apply user colors to cursors/selections
   - Show username tooltip on cursor hover
-- [ ] T035 [P] [US3] Register PresenceRenderer hook in assets/js/app.js
-- [ ] T036 [US3] Add presence overlay div to Show template
+- [x] T035 [P] [US3] Register PresenceRenderer hook in assets/js/app.js
+- [x] T036 [US3] Add presence overlay div to Show template
   - DOM ID "presence-overlay" with phx-hook="PresenceRenderer"
   - data-presences attribute with Jason.encode!(@presences)
-- [ ] T037 [US3] Add presence list UI to Show template
+- [x] T037 [US3] Add presence list UI to Show template
   - Display count: "#{map_size(@presences)} viewers"
   - List each viewer with name and color indicator
   - Style with Tailwind classes
 
-**Checkpoint**: Presence awareness complete - users see who's viewing with cursor/selection overlays
+**Checkpoint**: ✅ Presence awareness complete - users see who's viewing with cursor/selection overlays
 
 ---
 
