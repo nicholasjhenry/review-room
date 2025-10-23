@@ -7,12 +7,19 @@ defmodule ReviewRoomWeb.SnippetLive.Show do
   @impl true
   def mount(%{"id" => id}, session, socket) do
     snippet = Snippets.get_snippet!(id)
+    scope = socket.assigns[:current_scope]
+    current_user = current_user(socket)
 
     socket =
       socket
-      |> assign(snippet: snippet, page_title: snippet.title || "Code Snippet")
-      |> assign(presences: %{})
-      |> assign(user_id: nil)
+      |> assign(
+        snippet: snippet,
+        page_title: snippet.title || "Code Snippet",
+        presences: %{},
+        user_id: nil,
+        current_user: current_user,
+        can_edit?: Snippets.can_edit?(scope, snippet)
+      )
 
     socket =
       if connected?(socket) do
@@ -182,9 +189,23 @@ defmodule ReviewRoomWeb.SnippetLive.Show do
           </div>
         </div>
 
-        <div class="mt-6 flex gap-4">
+        <div class="mt-6 flex gap-4 items-center flex-wrap">
           <.link navigate={~p"/snippets/new"} class="text-blue-600 hover:text-blue-800">
             Create New Snippet
+          </.link>
+          <.link
+            :if={@can_edit?}
+            navigate={~p"/s/#{@snippet.id}/edit"}
+            class="text-gray-600 hover:text-gray-800"
+          >
+            Edit Snippet
+          </.link>
+          <.link
+            :if={@current_scope && @current_scope.user}
+            navigate={~p"/snippets/my"}
+            class="text-gray-600 hover:text-gray-800"
+          >
+            My Snippets
           </.link>
           <.link navigate={~p"/"} class="text-gray-600 hover:text-gray-800">
             Home
@@ -268,13 +289,37 @@ defmodule ReviewRoomWeb.SnippetLive.Show do
     {:noreply, assign(socket, presences: presences)}
   end
 
+  @impl true
+  def handle_info({:snippet_updated, %{id: snippet_id}}, socket) do
+    if socket.assigns.snippet.id == snippet_id do
+      snippet = Snippets.get_snippet!(snippet_id)
+      can_edit? = Snippets.can_edit?(socket.assigns[:current_scope], snippet)
+
+      {:noreply, assign(socket, snippet: snippet, can_edit?: can_edit?)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_info({:snippet_deleted, %{id: snippet_id}}, socket) do
+    if socket.assigns.snippet.id == snippet_id do
+      {:noreply,
+       socket
+       |> put_flash(:error, "This snippet is no longer available.")
+       |> push_navigate(to: ~p"/")}
+    else
+      {:noreply, socket}
+    end
+  end
+
   defp language_class(nil), do: ""
   defp language_class(lang), do: "language-#{lang}"
 
   defp get_user_id(socket, session) do
     cond do
-      socket.assigns[:current_scope] && socket.assigns.current_scope.user ->
-        "user_#{socket.assigns.current_scope.user.id}"
+      socket.assigns.current_user ->
+        "user_#{socket.assigns.current_user.id}"
 
       Map.has_key?(session, "live_socket_id") ->
         session["live_socket_id"]
@@ -286,10 +331,17 @@ defmodule ReviewRoomWeb.SnippetLive.Show do
   end
 
   defp get_display_name(socket) do
-    if socket.assigns[:current_scope] && socket.assigns.current_scope.user do
-      socket.assigns.current_scope.user.email
+    if socket.assigns.current_user do
+      socket.assigns.current_user.email
     else
       "Anonymous User"
+    end
+  end
+
+  defp current_user(socket) do
+    case socket.assigns[:current_scope] do
+      %{user: user} -> user
+      _ -> nil
     end
   end
 

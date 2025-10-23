@@ -2,6 +2,10 @@ defmodule ReviewRoomWeb.SnippetLive.NewTest do
   use ReviewRoomWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
+  alias ReviewRoom.Accounts.Scope
+  import ReviewRoom.AccountsFixtures
+
+  alias ReviewRoom.Snippets
 
   describe "New snippet page" do
     test "mount displays form", %{conn: conn} do
@@ -91,6 +95,30 @@ defmodule ReviewRoomWeb.SnippetLive.NewTest do
       # Check for visibility options
       assert html =~ "public"
       assert html =~ "private"
+    end
+
+    test "authenticated user associations snippet with account", %{conn: conn} do
+      user = user_fixture()
+
+      {:ok, view, _html} =
+        conn
+        |> log_in_user(user)
+        |> live(~p"/snippets/new")
+
+      {:ok, _show_view, _html} =
+        view
+        |> form("#snippet-form",
+          snippet: %{
+            code: "defmodule Example do\n  def hello, do: :world\nend",
+            title: "Owned Snippet",
+            language: "elixir"
+          }
+        )
+        |> render_submit()
+        |> follow_redirect(conn)
+
+      snippets = Snippets.list_user_snippets(Scope.for_user(user), limit: 5)
+      assert Enum.any?(snippets, &(&1.title == "Owned Snippet"))
     end
   end
 end

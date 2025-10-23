@@ -1,6 +1,7 @@
 defmodule ReviewRoom.SnippetsTest do
   use ReviewRoom.DataCase, async: true
 
+  alias ReviewRoom.Accounts.Scope
   alias ReviewRoom.Snippets
   alias ReviewRoom.Snippets.Snippet
 
@@ -30,14 +31,14 @@ defmodule ReviewRoom.SnippetsTest do
       user = user_fixture()
       attrs = %{code: "def hello, do: :world"}
 
-      assert {:ok, %Snippet{} = snippet} = Snippets.create_snippet(attrs, user)
+      assert {:ok, %Snippet{} = snippet} = Snippets.create_snippet(Scope.for_user(user), attrs)
       assert snippet.user_id == user.id
     end
 
     test "creates anonymous snippet when user is nil" do
       attrs = %{code: "def hello, do: :world"}
 
-      assert {:ok, %Snippet{} = snippet} = Snippets.create_snippet(attrs, nil)
+      assert {:ok, %Snippet{} = snippet} = Snippets.create_snippet(nil, attrs)
       assert snippet.user_id == nil
     end
 
@@ -95,6 +96,71 @@ defmodule ReviewRoom.SnippetsTest do
       changeset = Snippets.change_snippet(snippet, attrs)
 
       assert changeset.changes.title == "New Title"
+    end
+  end
+
+  describe "authorization and management" do
+    setup do
+      owner = user_fixture()
+      other_user = user_fixture()
+
+      {:ok,
+       owner: owner,
+       other_user: other_user,
+       owner_scope: Scope.for_user(owner),
+       other_scope: Scope.for_user(other_user)}
+    end
+
+    test "update_snippet/3 allows owner", %{owner: owner, owner_scope: owner_scope} do
+      snippet = snippet_fixture_with_user(owner)
+
+      assert {:ok, %Snippet{} = updated} =
+               Snippets.update_snippet(owner_scope, snippet, %{title: "Updated"})
+
+      assert updated.title == "Updated"
+      assert Snippets.get_snippet!(snippet.id).title == "Updated"
+    end
+
+    test "update_snippet/3 blocks non-owner", %{
+      owner: owner,
+      other_scope: other_scope
+    } do
+      snippet = snippet_fixture_with_user(owner)
+
+      assert {:error, :unauthorized} =
+               Snippets.update_snippet(other_scope, snippet, %{title: "Updated"})
+
+      assert Snippets.get_snippet!(snippet.id).title == snippet.title
+    end
+
+    test "delete_snippet/2 allows owner", %{owner: owner, owner_scope: owner_scope} do
+      snippet = snippet_fixture_with_user(owner)
+
+      assert {:ok, %Snippet{}} = Snippets.delete_snippet(owner_scope, snippet)
+      assert_raise Ecto.NoResultsError, fn -> Snippets.get_snippet!(snippet.id) end
+    end
+
+    test "delete_snippet/2 blocks non-owner", %{
+      owner: owner,
+      other_scope: other_scope
+    } do
+      snippet = snippet_fixture_with_user(owner)
+
+      assert {:error, :unauthorized} = Snippets.delete_snippet(other_scope, snippet)
+      assert Snippets.get_snippet!(snippet.id)
+    end
+
+    test "list_user_snippets/2 returns only user's snippets", %{
+      owner: owner,
+      other_user: other_user,
+      owner_scope: owner_scope
+    } do
+      owner_snippet = snippet_fixture_with_user(owner, %{title: "Owner Snippet"})
+      snippet_fixture_with_user(other_user, %{title: "Other Snippet"})
+
+      results = Snippets.list_user_snippets(owner_scope, limit: 10)
+
+      assert Enum.map(results, & &1.id) == [owner_snippet.id]
     end
   end
 end

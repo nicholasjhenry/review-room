@@ -241,18 +241,18 @@
 
 ### Tests for User Story 4 (MANDATORY - Test-First) ⚠️
 
-- [ ] T038 [P] [US4] Context authorization tests in test/review_room/snippets_test.exs
+- [x] T038 [P] [US4] Context authorization tests in test/review_room/snippets_test.exs
   - Test update_snippet/3 allows owner
   - Test update_snippet/3 blocks non-owner
   - Test delete_snippet/2 allows owner
   - Test delete_snippet/2 blocks non-owner
   - Test list_user_snippets/2 returns user's snippets only
-- [ ] T039 [P] [US4] LiveView Edit tests in test/review_room_web/live/snippet_live/edit_test.exs
+- [x] T039 [P] [US4] LiveView Edit tests in test/review_room_web/live/snippet_live/edit_test.exs
   - Test mount blocks non-owner
   - Test save updates snippet
   - Test save with errors shows messages
   - Test save broadcasts update to viewers
-- [ ] T040 [P] [US4] LiveView user history tests in test/review_room_web/live/user_snippet_live/index_test.exs
+- [x] T040 [P] [US4] LiveView user history tests in test/review_room_web/live/user_snippet_live/index_test.exs
   - Test mount requires authentication
   - Test displays user's snippets as stream
   - Test delete event removes from stream
@@ -260,14 +260,14 @@
 
 ### Implementation for User Story 4
 
-- [ ] T041 [US4] Add context functions to lib/review_room/snippets.ex
+- [x] T041 [US4] Add context functions to lib/review_room/snippets.ex
   - update_snippet/3 (snippet, attrs, user)
   - delete_snippet/2 (snippet, user)
   - list_user_snippets/2 (user_id, opts)
   - can_edit?/2 (snippet, user)
   - can_delete?/2 (snippet, user)
   - toggle_visibility/2 (snippet, user)
-- [ ] T042 [US4] Create SnippetLive.Edit in lib/review_room_web/live/snippet_live/edit.ex
+- [x] T042 [US4] Create SnippetLive.Edit in lib/review_room_web/live/snippet_live/edit.ex
   - mount/3 with authorization check (can_edit?)
   - Form with to_form/2 from existing snippet
   - handle_event("validate", ...)
@@ -275,19 +275,19 @@
   - handle_event("delete", ...) with confirmation
   - Broadcast snippet_updated via PubSub on save
   - Broadcast snippet_deleted via PubSub on delete
-- [ ] T043 [US4] Update SnippetLive.Show for edit broadcasts in lib/review_room_web/live/snippet_live/show.ex
+- [x] T043 [US4] Update SnippetLive.Show for edit broadcasts in lib/review_room_web/live/snippet_live/show.ex
   - handle_info({:snippet_updated, data}, socket) - reload snippet
   - handle*info({:snippet_deleted, *}, socket) - redirect with flash
-- [ ] T044 [US4] Create UserSnippetLive.Index in lib/review_room_web/live/user_snippet_live/index.ex
+- [x] T044 [US4] Create UserSnippetLive.Index in lib/review_room_web/live/user_snippet_live/index.ex
   - mount/3 requires authentication
   - Load user snippets with stream/3
   - handle_event("delete", %{"id" => id}) - stream_delete
   - handle_event("toggle_visibility", %{"id" => id}) - stream_insert
   - Display snippets with creation date, title, visibility
-- [ ] T045 [US4] Add edit and user history routes to lib/review_room_web/router.ex
+- [x] T045 [US4] Add edit and user history routes to lib/review_room_web/router.ex
   - Auth: live "/s/:id/edit", SnippetLive.Edit, :edit
   - Auth: live "/snippets/my", UserSnippetLive.Index, :index
-- [ ] T046 [US4] Add "Edit" link to Show template (only for owner)
+- [x] T046 [US4] Add "Edit" link to Show template (only for owner)
   - :if={can_edit?(@snippet, @current_user)}
 
 **Checkpoint**: Snippet management complete - users can edit, delete, view history
