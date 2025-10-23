@@ -45,7 +45,7 @@ defmodule ReviewRoomWeb.SnippetLive.Components do
             required
             rows="20"
             phx-debounce="300"
-            class="font-mono text-sm min-h-[400px]"
+            class="w-full font-mono text-sm min-h-[400px] border border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500"
           />
         </div>
 
