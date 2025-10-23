@@ -4,6 +4,7 @@ defmodule ReviewRoomWeb.SnippetLive.Edit do
   alias Phoenix.PubSub
   alias ReviewRoom.Snippets
   alias ReviewRoom.Snippets.Snippet
+  alias ReviewRoomWeb.SnippetLive.Components
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do
@@ -97,135 +98,22 @@ defmodule ReviewRoomWeb.SnippetLive.Edit do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
-      <div class="mx-auto max-w-4xl px-4 py-8 space-y-8">
-        <div>
-          <h1 class="text-3xl font-bold tracking-tight text-gray-900">Edit Snippet</h1>
-          <p class="mt-2 text-sm text-gray-600">
-            Update your code snippet details below. Changes will be reflected in real time for active viewers.
-          </p>
-        </div>
-
-        <.form
-          for={@form}
-          id="snippet-edit-form"
-          phx-change="validate"
-          phx-submit="save"
-          class="space-y-6 bg-white border border-gray-200 rounded-xl shadow-sm p-6"
-        >
-          <div>
-            <.input
-              field={@form[:code]}
-              type="textarea"
-              label="Code"
-              required
-              rows="20"
-              phx-debounce="300"
-              class="font-mono text-sm min-h-[400px]"
-            />
-          </div>
-
-          <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div>
-              <.input field={@form[:title]} type="text" label="Title (optional)" />
-            </div>
-
-            <div>
-              <.input
-                field={@form[:language]}
-                type="select"
-                label="Language"
-                options={language_options()}
-                prompt="Auto-detect"
-              />
-            </div>
-          </div>
-
-          <div>
-            <.input
-              field={@form[:description]}
-              type="textarea"
-              label="Description (optional)"
-              rows="3"
-            />
-          </div>
-
-          <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div>
-              <.input
-                field={@form[:visibility]}
-                type="select"
-                label="Visibility"
-                options={[
-                  {"Private (link only)", :private},
-                  {"Public (discoverable)", :public}
-                ]}
-              />
-            </div>
-            <div class="flex items-end">
-              <span class="text-sm text-gray-500">
-                Public snippets appear in the discoverable gallery instantly.
-              </span>
-            </div>
-          </div>
-
-          <div class="flex flex-wrap gap-4">
-            <.button type="submit" phx-disable-with="Saving..." class="min-w-[150px]">
-              Save changes
-            </.button>
-
-            <.link
-              navigate={~p"/s/#{@snippet.id}"}
-              class="inline-flex items-center justify-center rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
-            >
-              Cancel
-            </.link>
-
-            <button
-              type="button"
-              id={"delete-snippet-#{@snippet.id}"}
-              phx-click="delete"
-              phx-confirm="Are you sure you want to delete this snippet? This action cannot be undone."
-              class="inline-flex items-center justify-center rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-100 transition"
-            >
-              Delete snippet
-            </button>
-          </div>
-        </.form>
-      </div>
+      <Components.snippet_form
+        title="Edit Snippet"
+        description="Update your code snippet details below. Changes will be reflected in real time for active viewers."
+        form={@form}
+        snippet={@snippet}
+        id="snippet-edit-form"
+        cancel_href={~p"/s/#{@snippet.id}"}
+        submit_label="Save changes"
+        submit_disable_with="Saving..."
+        show_delete?={true}
+        delete_button_id={"delete-snippet-#{@snippet.id}"}
+        delete_event="delete"
+        delete_confirm="Are you sure you want to delete this snippet? This action cannot be undone."
+      />
     </Layouts.app>
     """
-  end
-
-  defp language_options do
-    [
-      {"Elixir", "elixir"},
-      {"Erlang", "erlang"},
-      {"JavaScript", "javascript"},
-      {"TypeScript", "typescript"},
-      {"Python", "python"},
-      {"Ruby", "ruby"},
-      {"Go", "go"},
-      {"Rust", "rust"},
-      {"Java", "java"},
-      {"Kotlin", "kotlin"},
-      {"Swift", "swift"},
-      {"C", "c"},
-      {"C++", "cpp"},
-      {"C#", "csharp"},
-      {"PHP", "php"},
-      {"SQL", "sql"},
-      {"HTML", "html"},
-      {"CSS", "css"},
-      {"SCSS", "scss"},
-      {"JSON", "json"},
-      {"YAML", "yaml"},
-      {"Markdown", "markdown"},
-      {"Shell", "shell"},
-      {"Bash", "bash"},
-      {"Dockerfile", "dockerfile"},
-      {"XML", "xml"},
-      {"Plain Text", "plaintext"}
-    ]
   end
 
   defp current_user(socket) do
