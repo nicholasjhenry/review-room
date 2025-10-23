@@ -7,7 +7,11 @@ defmodule ReviewRoomWeb.SnippetLive.New do
   @impl true
   def mount(_params, _session, socket) do
     changeset = Snippets.change_snippet(%Snippet{})
-    {:ok, assign(socket, form: to_form(changeset))}
+
+    {:ok,
+     socket
+     |> assign(:current_user, current_user(socket))
+     |> assign(:form, to_form(changeset))}
   end
 
   @impl true
@@ -22,7 +26,7 @@ defmodule ReviewRoomWeb.SnippetLive.New do
 
   @impl true
   def handle_event("save", %{"snippet" => snippet_params}, socket) do
-    current_user = Map.get(socket.assigns, :current_user)
+    current_user = socket.assigns.current_user
 
     case Snippets.create_snippet(snippet_params, current_user) do
       {:ok, snippet} ->
@@ -143,5 +147,12 @@ defmodule ReviewRoomWeb.SnippetLive.New do
       {"XML", "xml"},
       {"Plain Text", "plaintext"}
     ]
+  end
+
+  defp current_user(socket) do
+    case socket.assigns[:current_scope] do
+      %{user: user} -> user
+      _ -> nil
+    end
   end
 end
