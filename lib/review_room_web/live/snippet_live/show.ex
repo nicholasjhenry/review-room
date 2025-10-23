@@ -189,7 +189,7 @@ defmodule ReviewRoomWeb.SnippetLive.Show do
           </div>
         </div>
 
-        <div class="mt-6 flex gap-4 items-center">
+        <div class="mt-6 flex gap-4 items-center flex-wrap">
           <.link navigate={~p"/snippets/new"} class="text-blue-600 hover:text-blue-800">
             Create New Snippet
           </.link>
@@ -199,6 +199,13 @@ defmodule ReviewRoomWeb.SnippetLive.Show do
             class="text-gray-600 hover:text-gray-800"
           >
             Edit Snippet
+          </.link>
+          <.link
+            :if={@current_scope && @current_scope.user}
+            navigate={~p"/snippets/my"}
+            class="text-gray-600 hover:text-gray-800"
+          >
+            My Snippets
           </.link>
           <.link navigate={~p"/"} class="text-gray-600 hover:text-gray-800">
             Home
