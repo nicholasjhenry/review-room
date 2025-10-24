@@ -25,10 +25,15 @@
    - Add or update LiveView hooks in `assets/js/app.js` for clipboard success, filter panel toggles, and reduced-motion overrides.
    - Make sure hooks guard against duplicate DOM updates (`phx-update="ignore"` where appropriate).
 
-6. **Accessibility Verification**
+6. **Gallery Visual Verification**
+   - Use `ReviewRoomWeb.DesignSystemCase` helpers to snapshot `#gallery-hero`, `#gallery-filter-panel`, and `[data-role="gallery-card"]` so stats, overlay hooks, and metadata stay aligned with Spec 003.
+   - Confirm `#gallery-layout-toggle` buttons flip `aria-pressed` states via the `"set_layout"` event and that `#gallery-stream` retains `phx-update="stream"` with responsive grid/list classes.
+   - Manually toggle the filter panel (button `#gallery-filters-trigger`) to ensure the `FilterPanelToggle` hook honors the `data-open-classes` / `data-closed-classes` contract without DOM diff conflicts.
+
+7. **Accessibility Verification**
    - Run tests to confirm color contrast tokens satisfy WCAG 2.1 AA (document ratios in tests or fixtures).
    - Validate reduced-motion preferences by toggling OS setting and confirming transitions disable gracefully.
 
-7. **Finalize**
+8. **Finalize**
    - Run `mix precommit` to enforce constitution gates.
    - Capture screenshots or LazyHTML snapshots demonstrating redesigned states for review.

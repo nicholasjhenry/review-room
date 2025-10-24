@@ -3,6 +3,7 @@ defmodule ReviewRoomWeb.SnippetLive.Index do
 
   alias ReviewRoom.Snippets
   alias ReviewRoom.Snippets.Snippet
+  alias ReviewRoomWeb.Components.DesignSystem.GalleryComponents
 
   @moduledoc """
   Public discovery gallery for snippets with filtering, search, responsive layouts, and
@@ -35,18 +36,25 @@ defmodule ReviewRoomWeb.SnippetLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
+    languages = Snippets.supported_languages()
+
     socket =
       socket
       |> assign(:page_title, "Discover Snippets")
       |> assign(:language_filter, nil)
       |> assign(:search_query, "")
-      |> assign(:languages, Snippets.supported_languages())
+      |> assign(:languages, languages)
       |> assign(:next_cursor, nil)
       |> assign(:snippets_empty?, true)
       |> assign(:loading?, true)
+      |> assign(:gallery_layout, :grid)
+      |> assign(:gallery_metrics, gallery_metrics(languages))
+      |> assign(:filter_summary, default_filter_summary())
+      |> assign(:active_filter_count, 0)
       |> stream(:snippets, [], reset: true)
       |> assign_filter_form()
       |> assign_search_form()
+      |> assign_filter_summary()
 
     socket = if connected?(socket), do: refresh_gallery(socket, reset: true), else: socket
 
@@ -61,6 +69,7 @@ defmodule ReviewRoomWeb.SnippetLive.Index do
       socket
       |> assign(:language_filter, language)
       |> assign_filter_form()
+      |> assign_filter_summary()
       |> refresh_gallery(reset: true)
 
     {:noreply, socket}
@@ -76,6 +85,7 @@ defmodule ReviewRoomWeb.SnippetLive.Index do
       socket
       |> assign(:search_query, query)
       |> assign_search_form()
+      |> assign_filter_summary()
       |> refresh_gallery(reset: true)
 
     {:noreply, socket}
@@ -86,10 +96,25 @@ defmodule ReviewRoomWeb.SnippetLive.Index do
       socket
       |> assign(:search_query, "")
       |> assign_search_form()
+      |> assign_filter_summary()
       |> refresh_gallery(reset: true)
 
     {:noreply, socket}
   end
+
+  def handle_event("set_layout", %{"layout" => layout}, socket) do
+    layout_atom = normalize_layout(layout)
+
+    socket =
+      case layout_atom do
+        nil -> socket
+        normalized -> assign(socket, :gallery_layout, normalized)
+      end
+
+    {:noreply, socket}
+  end
+
+  def handle_event("set_layout", _params, socket), do: {:noreply, socket}
 
   @impl true
   def handle_event("load_more", %{"cursor" => cursor}, socket) do
@@ -109,52 +134,87 @@ defmodule ReviewRoomWeb.SnippetLive.Index do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
       <section class="mx-auto max-w-6xl px-4 py-10 space-y-10">
-        <div class="flex flex-wrap items-start justify-between gap-6">
-          <div class="space-y-3 max-w-3xl">
-            <h1 class="text-4xl font-semibold tracking-tight text-slate-900">
-              Discover World-Class Code Snippets
-            </h1>
-            <p class="text-base text-slate-600 leading-relaxed">
-              Browse community-contributed snippets with instant syntax highlighting, curated by
-              language and recency. Toggle languages, search by intent, and jump straight into live
-              collaboration.
+        <GalleryComponents.hero
+          layout={@gallery_layout}
+          metrics={@gallery_metrics}
+          featured_languages={@gallery_metrics[:featured_languages] || []}
+          cta_href={~p"/snippets/new"}
+        />
+
+        <section class="grid gap-4 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)]">
+          <div class="space-y-3">
+            <button
+              id="gallery-filters-trigger"
+              type="button"
+              class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+            >
+              <.icon name="hero-adjustments-vertical" class="h-4 w-4" /> Filters
+              <span
+                :if={@active_filter_count > 0}
+                class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white"
+              >
+                {@active_filter_count}
+              </span>
+            </button>
+
+            <section
+              id="gallery-filter-panel"
+              phx-hook="FilterPanelToggle"
+              phx-update="ignore"
+              data-trigger="#gallery-filters-trigger"
+              data-close-on-outside="true"
+              data-state="closed"
+              data-open-classes="translate-y-0 opacity-100 pointer-events-auto block"
+              data-closed-classes="-translate-y-4 opacity-0 pointer-events-none hidden"
+              class="gallery-filter-panel pointer-events-none -translate-y-4 opacity-0 hidden"
+            >
+              <div class="rounded-3xl border border-white/10 bg-white/95 p-5 shadow-2xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/95">
+                <header class="mb-4 flex items-center justify-between">
+                  <div>
+                    <p class="text-sm font-semibold text-slate-900 dark:text-white">Language focus</p>
+                    <p class="text-xs text-slate-500">
+                      Filters apply instantly to the gallery stream
+                    </p>
+                  </div>
+                  <span class="hidden text-[0.55rem] uppercase tracking-[0.4em] text-slate-400 sm:inline-flex">
+                    Instant
+                  </span>
+                </header>
+
+                <.form
+                  for={@filter_form}
+                  id="language-filter-form"
+                  phx-change="filter"
+                  class="space-y-3"
+                >
+                  <.input
+                    field={@filter_form[:language]}
+                    type="select"
+                    prompt="All languages"
+                    class="w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 shadow-inner focus:border-slate-900 focus:ring-slate-900"
+                    options={language_options(@languages)}
+                  />
+                </.form>
+
+                <p class="mt-4 text-xs text-slate-500">
+                  Tip: Combine language filters with search keywords to generate curated boards.
+                </p>
+              </div>
+            </section>
+
+            <p
+              id="gallery-filter-summary"
+              class="text-xs font-medium uppercase tracking-[0.3em] text-slate-500"
+            >
+              {@filter_summary}
             </p>
           </div>
-
-          <.link
-            navigate={~p"/snippets/new"}
-            class="inline-flex items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-          >
-            <.icon name="hero-plus-small" class="h-4 w-4" /> Share a Snippet
-          </.link>
-        </div>
-
-        <div class="grid gap-4 md:grid-cols-[minmax(0,280px)_minmax(0,1fr)] items-start">
-          <.form
-            for={@filter_form}
-            id="language-filter-form"
-            phx-change="filter"
-            class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-          >
-            <h2 class="text-sm font-semibold text-slate-700">Language</h2>
-            <p class="mt-1 text-xs text-slate-500">
-              Refine the gallery by primary language. Public snippets update instantly.
-            </p>
-
-            <.input
-              field={@filter_form[:language]}
-              type="select"
-              class="mt-4 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm shadow-inner focus:border-blue-500 focus:ring-blue-500"
-              options={language_options(@languages)}
-              prompt="All languages"
-            />
-          </.form>
 
           <.form
             for={@search_form}
             id="snippet-search-form"
             phx-submit="search"
-            class="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+            class="flex flex-col gap-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"
           >
             <label class="text-sm font-semibold text-slate-700" for="search-query">
               Search public snippets
@@ -166,8 +226,8 @@ defmodule ReviewRoomWeb.SnippetLive.Index do
                 field={@search_form[:query]}
                 type="text"
                 placeholder={"Try \"phoenix liveview\" or \"graph traversal\""}
-                phx-debounce="400"
-                class="flex-1 rounded-xl border border-slate-200 px-4 py-2 text-sm shadow-inner focus:border-blue-500 focus:ring-blue-500"
+                phx-debounce="350"
+                class="flex-1 rounded-2xl border border-slate-200 px-4 py-2 text-sm shadow-inner focus:border-slate-900 focus:ring-slate-900"
               />
 
               <button
@@ -188,88 +248,42 @@ defmodule ReviewRoomWeb.SnippetLive.Index do
               </button>
             </div>
           </.form>
-        </div>
+        </section>
 
         <div :if={@loading?} class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          <div
+          <GalleryComponents.skeleton_card
             :for={index <- 1..6}
             id={"snippet-gallery-skeleton-#{index}"}
-            class="animate-pulse rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
-          >
-            <div class="flex justify-between gap-3">
-              <div class="h-5 w-32 rounded-full bg-slate-200" />
-              <div class="h-5 w-16 rounded-full bg-slate-200" />
-            </div>
-            <div class="mt-4 space-y-3">
-              <div class="h-4 w-full rounded-full bg-slate-100" />
-              <div class="h-4 w-3/4 rounded-full bg-slate-100" />
-              <div class="h-4 w-2/3 rounded-full bg-slate-100" />
-            </div>
-            <div class="mt-6 flex justify-between">
-              <div class="h-4 w-24 rounded-full bg-slate-100" />
-              <div class="h-4 w-20 rounded-full bg-slate-100" />
-            </div>
-            <div class="mt-6 h-9 w-28 rounded-full bg-slate-100" />
-          </div>
+          />
         </div>
 
         <div
-          id="snippet-gallery"
-          class="grid gap-6 md:grid-cols-2 xl:grid-cols-3"
+          id="gallery-stream"
+          class={[
+            "grid gap-6",
+            @gallery_layout == :grid && "md:grid-cols-2 xl:grid-cols-3",
+            @gallery_layout == :list && "grid-cols-1"
+          ]}
           phx-update="stream"
         >
           <div
-            id="snippet-gallery-empty"
-            class="col-span-full text-center text-sm text-slate-500 italic only:block"
+            id="gallery-empty"
+            class="col-span-full hidden rounded-3xl border border-dashed border-slate-200 bg-white/80 px-5 py-10 text-center text-sm text-slate-500 only:flex only:flex-col only:items-center only:justify-center"
           >
             <span :if={not @loading? and @snippets_empty?}>
-              No public snippets match your filters yet. Toggle the language or clear the search to explore new ideas.
+              No public snippets match your filters yet. Adjust the search or language filter to discover a new wave.
             </span>
           </div>
 
-          <article
+          <GalleryComponents.card
             :for={{dom_id, snippet} <- @streams.snippets}
             id={dom_id}
-            class="relative flex h-full flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
-          >
-            <div class="space-y-3">
-              <div class="flex items-start justify-between gap-3">
-                <h3 class="text-lg font-semibold text-slate-900 line-clamp-2">
-                  {snippet.title || "Untitled Snippet"}
-                </h3>
-                <span
-                  :if={snippet.language}
-                  class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600"
-                >
-                  {display_language(snippet.language)}
-                </span>
-              </div>
-
-              <p class="text-sm text-slate-600 line-clamp-3">
-                {snippet.description || "This snippet is ready to explore in real-time."}
-              </p>
-            </div>
-
-            <div class="mt-6 flex items-center justify-between text-xs text-slate-500">
-              <div class="flex items-center gap-2">
-                <div class="h-2 w-2 rounded-full bg-emerald-400" />
-                <span>
-                  {format_inserted_at(snippet.inserted_at)}
-                </span>
-              </div>
-              <div :if={snippet.user} class="flex items-center gap-2 text-slate-600">
-                <.icon name="hero-user" class="h-4 w-4" />
-                <span>{snippet.user.email}</span>
-              </div>
-            </div>
-
-            <.link
-              navigate={~p"/s/#{snippet.id}"}
-              class="mt-6 inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
-            >
-              View snippet <.icon name="hero-arrow-right" class="h-4 w-4" />
-            </.link>
-          </article>
+            snippet={snippet}
+            layout={@gallery_layout}
+            language_label={display_language(snippet.language)}
+            owner_label={owner_label(snippet)}
+            activity_label={format_inserted_at(snippet.inserted_at)}
+          />
         </div>
 
         <div :if={@next_cursor} class="flex justify-center">
@@ -278,7 +292,7 @@ defmodule ReviewRoomWeb.SnippetLive.Index do
             type="button"
             phx-click="load_more"
             phx-value-cursor={@next_cursor}
-            class="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-400 hover:text-slate-900"
+            class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:text-slate-900"
             phx-click-loading="opacity-60 cursor-progress"
           >
             Load more snippets <.icon name="hero-chevron-double-down" class="h-4 w-4" />
@@ -389,6 +403,32 @@ defmodule ReviewRoomWeb.SnippetLive.Index do
     assign(socket, :search_form, form)
   end
 
+  defp assign_filter_summary(socket) do
+    active =
+      []
+      |> maybe_add_filter(:language, socket.assigns[:language_filter])
+      |> maybe_add_filter(:search, socket.assigns[:search_query])
+
+    summary =
+      case active do
+        [] ->
+          default_filter_summary()
+
+        filters ->
+          labels =
+            filters
+            |> Enum.map(&filter_label/1)
+            |> Enum.join(" + ")
+
+          "Filtered by #{labels}"
+      end
+
+    assign(socket,
+      filter_summary: summary,
+      active_filter_count: length(active)
+    )
+  end
+
   defp language_form_value(nil), do: %{"language" => ""}
   defp language_form_value(language), do: %{"language" => language}
 
@@ -416,6 +456,13 @@ defmodule ReviewRoomWeb.SnippetLive.Index do
   end
 
   defp normalize_query(_), do: ""
+
+  defp normalize_layout(layout) when layout in ["grid", "list"],
+    do: String.to_existing_atom(layout)
+
+  defp normalize_layout("Grid"), do: :grid
+  defp normalize_layout("List"), do: :list
+  defp normalize_layout(_), do: nil
 
   defp language_options(languages) do
     Enum.map(languages, fn language ->
@@ -449,4 +496,38 @@ defmodule ReviewRoomWeb.SnippetLive.Index do
     |> DateTime.from_naive!("Etc/UTC")
     |> format_inserted_at()
   end
+
+  defp owner_label(%Snippet{user: %{email: email}}), do: email
+  defp owner_label(_), do: "Community spotlight"
+
+  defp default_filter_summary, do: "Showing all curated snippets"
+
+  defp gallery_metrics(languages) do
+    featured =
+      languages
+      |> Enum.take(4)
+      |> Enum.map(&humanize_language/1)
+
+    %{
+      languages_supported: length(languages),
+      active_creators: "24K+",
+      featured_languages: featured
+    }
+  end
+
+  defp maybe_add_filter(filters, _label, nil), do: filters
+
+  defp maybe_add_filter(filters, :search, query) do
+    if has_search?(query) do
+      [:search | filters]
+    else
+      filters
+    end
+  end
+
+  defp maybe_add_filter(filters, _label, value) when value in ["", nil], do: filters
+  defp maybe_add_filter(filters, label, _value), do: [label | filters]
+
+  defp filter_label(:language), do: "language"
+  defp filter_label(:search), do: "search"
 end

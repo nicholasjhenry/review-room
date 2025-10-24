@@ -1,10 +1,12 @@
 defmodule ReviewRoomWeb.SnippetLive.IndexTest do
   use ReviewRoomWeb.ConnCase, async: true
+  use ReviewRoomWeb.DesignSystemCase
 
   import Phoenix.LiveViewTest
   import ReviewRoom.SnippetsFixtures
   import Ecto.Changeset
   alias ReviewRoom.Repo
+  alias ReviewRoom.AccountsFixtures
 
   describe "public gallery" do
     test "mount loads public snippets as stream", %{conn: conn} do
@@ -93,5 +95,58 @@ defmodule ReviewRoomWeb.SnippetLive.IndexTest do
     snippet
     |> change(inserted_at: DateTime.truncate(datetime, :second))
     |> Repo.update!()
+  end
+
+  describe "gallery design system" do
+    test "renders hero layout with world-class toggles", %{conn: conn} do
+      snippet_fixture(%{visibility: :public, title: "Prime"})
+
+      {:ok, view, _html} = live(conn, ~p"/snippets")
+
+      assert has_element?(view, "#gallery-hero h1", "World-Class Snippet Library")
+
+      assert has_element?(
+               view,
+               "#gallery-layout-toggle button[data-layout=\"grid\"][aria-pressed=\"true\"]"
+             )
+
+      assert has_element?(
+               view,
+               "#gallery-layout-toggle button[data-layout=\"list\"][aria-pressed=\"false\"]"
+             )
+    end
+
+    test "filter panel overlay opts into FilterPanelToggle hook", %{conn: conn} do
+      snippet_fixture(%{visibility: :public, title: "Filterable"})
+
+      {:ok, view, _html} = live(conn, ~p"/snippets")
+
+      [{"section", attrs, _children}] = render_lazy_tree(view, "#gallery-filter-panel")
+
+      assert {"phx-hook", "FilterPanelToggle"} in attrs
+      assert {"phx-update", "ignore"} in attrs
+      assert {"data-trigger", "#gallery-filters-trigger"} in attrs
+    end
+
+    test "cards display owner, language badge, and micro-copy", %{conn: conn} do
+      user = AccountsFixtures.user_fixture()
+      snippet_fixture_with_user(user, %{visibility: :public, title: "Owner Snippet"})
+
+      {:ok, view, _html} = live(conn, ~p"/snippets")
+
+      assert has_element?(
+               view,
+               "[data-role='gallery-card'] [data-role='gallery-card-owner']",
+               user.email
+             )
+
+      assert has_element?(
+               view,
+               "[data-role='gallery-card'] [data-role='gallery-language']",
+               "Elixir"
+             )
+
+      assert has_element?(view, "#gallery-stream[phx-update='stream']")
+    end
   end
 end

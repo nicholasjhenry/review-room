@@ -32,13 +32,13 @@ Deliver a premium snippets gallery with responsive layouts, updated cards, and m
 
 ### Tasks
 
-- [ ] T009 [US1] Author failing LiveView tests for gallery layout and accessibility in test/review_room_web/live/snippet_gallery_live_test.exs
-- [ ] T010 [US1] Add gallery layout design components in lib/review_room_web/components/design_system/gallery_components.ex
-- [ ] T011 [US1] Update lib/review_room_web/live/snippet_gallery_live.ex to stream new component assigns (layout, filters, empty state flags)
-- [ ] T012 [US1] Rewrite lib/review_room_web/live/snippet_gallery_live.html.heex with new grid, hero, filter controls, and skeleton loaders
-- [ ] T013 [US1] Implement responsive card styling and DaisyUI theme classes in assets/css/design-system.css (gallery section)
-- [ ] T014 [US1] Extend assets/js/app.js with filter panel toggle hook (phx-update=ignore safety)
-- [ ] T015 [US1] Document gallery visual verification steps in specs/003-revamp-ui-design/quickstart.md (append testing notes)
+- [x] T009 [US1] Author failing LiveView tests for gallery layout and accessibility in test/review_room_web/live/snippet_gallery_live_test.exs
+- [x] T010 [US1] Add gallery layout design components in lib/review_room_web/components/design_system/gallery_components.ex
+- [x] T011 [US1] Update lib/review_room_web/live/snippet_gallery_live.ex to stream new component assigns (layout, filters, empty state flags)
+- [x] T012 [US1] Rewrite lib/review_room_web/live/snippet_gallery_live.html.heex with new grid, hero, filter controls, and skeleton loaders
+- [x] T013 [US1] Implement responsive card styling and DaisyUI theme classes in assets/css/design-system.css (gallery section)
+- [x] T014 [US1] Extend assets/js/app.js with filter panel toggle hook (phx-update=ignore safety)
+- [x] T015 [US1] Document gallery visual verification steps in specs/003-revamp-ui-design/quickstart.md (append testing notes)
 
 ## Phase 4 – User Story 2 (Confident Snippet Management, P2)
 

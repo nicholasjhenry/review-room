@@ -68,7 +68,7 @@ defmodule ReviewRoomWeb.DesignSystemCase do
   def lazy_select(fragment, selector) when is_binary(selector) do
     fragment
     |> lazy_fragment()
-    |> LazyHTML.filter(selector)
+    |> LazyHTML.query(selector)
   end
 
   @doc """
