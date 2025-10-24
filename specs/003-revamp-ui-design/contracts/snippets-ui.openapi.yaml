@@ -1,0 +1,154 @@
+openapi: 3.0.3
+info:
+  title: ReviewRoom Snippet UI Support
+  version: "1.0.0"
+  description: |
+    Endpoints consumed by the redesigned snippet experience. No schema changes
+    are introduced; this contract documents required fields and response shapes
+    the UI depends on for visual and interaction states.
+servers:
+  - url: https://app.reviewroom.dev
+paths:
+  /api/snippets:
+    get:
+      summary: List public snippets for gallery
+      parameters:
+        - in: query
+          name: visibility
+          schema:
+            type: string
+            enum: [public, private, unlisted]
+          description: Filter snippets by visibility.
+        - in: query
+          name: language
+          schema:
+            type: string
+          description: Filter by programming language.
+      responses:
+        "200":
+          description: Snippet summaries for gallery cards.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/SnippetSummary"
+  /api/snippets/{id}:
+    get:
+      summary: Retrieve snippet detail for collaboration view.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Full snippet details including content and metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SnippetDetail"
+  /api/snippets/{id}:
+    patch:
+      summary: Update snippet attributes from management forms.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SnippetUpdate"
+      responses:
+        "200":
+          description: Updated snippet metadata for confirmation toasts.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SnippetDetail"
+components:
+  schemas:
+    SnippetSummary:
+      type: object
+      required: [id, title, language, visibility, updated_at, owner_name]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        language:
+          type: string
+        visibility:
+          type: string
+          enum: [public, private, unlisted]
+        updated_at:
+          type: string
+          format: date-time
+        owner_name:
+          type: string
+        owner_avatar_url:
+          type: string
+          format: uri
+          nullable: true
+        activity_badge:
+          type: string
+          description: Short label describing recent activity (e.g., "Edited 2h ago").
+    SnippetDetail:
+      allOf:
+        - $ref: "#/components/schemas/SnippetSummary"
+        - type: object
+          required: [body, collaborators]
+          properties:
+            body:
+              type: string
+            collaborators:
+              type: array
+              items:
+                type: object
+                required: [user_id, display_name, avatar_url]
+                properties:
+                  user_id:
+                    type: string
+                  display_name:
+                    type: string
+                  avatar_url:
+                    type: string
+                    format: uri
+                    nullable: true
+            visibility_history:
+              type: array
+              description: Timeline entries for visibility changes.
+              items:
+                type: object
+                required: [status, changed_at]
+                properties:
+                  status:
+                    type: string
+                    enum: [public, private, unlisted]
+                  changed_at:
+                    type: string
+                    format: date-time
+    SnippetUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        language:
+          type: string
+        visibility:
+          type: string
+          enum: [public, private, unlisted]
+        description:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
