@@ -31,15 +31,27 @@ import { SyntaxHighlight } from "./hooks/syntax_highlight";
 import CursorTracker from "./hooks/cursor_tracker";
 import { PresenceRenderer } from "./hooks/presence_renderer";
 import ClipboardCopy from "./hooks/clipboard_copy";
+import FilterPanelToggle from "./hooks/filter_panel_toggle";
 
 // Make hljs globally available for LiveView hooks
 window.hljs = hljs;
+
+const designSystemHooks = {
+  ClipboardCopy,
+  FilterPanelToggle,
+};
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content");
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: { _csrf_token: csrfToken },
-  hooks: { ...colocatedHooks, SyntaxHighlight, CursorTracker, PresenceRenderer, ClipboardCopy },
+  hooks: {
+    ...colocatedHooks,
+    ...designSystemHooks,
+    SyntaxHighlight,
+    CursorTracker,
+    PresenceRenderer,
+  },
 });
 
 // Show progress bar on live navigation and form submits
