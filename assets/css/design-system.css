@@ -1,0 +1,41 @@
+/*
+  ReviewRoom Design System (Spec 003 – Phase 1)
+  ---------------------------------------------------------------------------
+  This stylesheet documents how Tailwind v4 and DaisyUI are extended for the
+  redesigned snippet experience. Subsequent phases populate the sections below
+  with concrete tokens, themes, and component primitives.
+
+  Authoring Guidelines
+  - Define shared design tokens with Tailwind's @theme directive so values stay
+    in sync across utilities and custom classes.
+  - Expose tokens as CSS custom properties for LiveView templates that depend
+    on dynamic theming or reduced-motion behaviour.
+  - Layer bespoke DaisyUI themes instead of relying on stock palettes to meet
+    the world-class UI mandate.
+  - Keep motion timing under 200ms with gentle easing curves; provide reduced
+    motion fallbacks via prefers-reduced-motion media queries.
+  - Document section ownership with concise comments—future contributors should
+    understand where to add colors, typography, spacing scales, and component
+    states.
+
+  Section Index
+  1. @theme token declarations (colors, typography, spacing, radius, shadow).
+  2. DaisyUI theme extensions mapped to the token vocabulary.
+  3. Component-level primitives (cards, forms, navigation, skeletons).
+  4. Accessibility overrides (contrast pairs, reduced-motion adjustments).
+
+  Phase 2 (T006) introduces the actual token map and DaisyUI overrides.
+  Later phases append component primitives and accessibility hooks.
+*/
+
+@layer base {
+  /* Phase 2 populates token declarations via @theme and custom properties. */
+}
+
+@layer components {
+  /* Future component primitives (gallery cards, forms, navigation, skeletons). */
+}
+
+@layer utilities {
+  /* Accessibility & motion utility helpers scoped to prefers-reduced-motion. */
+}

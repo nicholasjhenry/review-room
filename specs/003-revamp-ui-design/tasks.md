@@ -6,8 +6,8 @@
 
 ## Phase 1 – Setup & Tooling
 
-- [ ] T001 Document Tailwind/DaisyUI customization approach in assets/css/design-system.css (create file)
-- [ ] T002 Update AGENTS.md with design-system summary reference (ensure context aligns with plan)
+- [x] T001 Document Tailwind/DaisyUI customization approach in assets/css/design-system.css (create file)
+- [x] T002 Update AGENTS.md with design-system summary reference (ensure context aligns with plan)
 
 ## Phase 2 – Foundational Work
 
