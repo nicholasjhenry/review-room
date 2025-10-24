@@ -67,6 +67,18 @@ defmodule ReviewRoom.Snippets.SnippetTest do
       assert get_field(changeset, :visibility) == :private
     end
 
+    test "rejects snippets longer than 10,000 lines" do
+      code = Enum.map_join(1..10_001, "\n", &"line #{&1}")
+
+      changeset = Snippet.create_changeset(%Snippet{}, %{code: code})
+
+      refute changeset.valid?
+
+      assert "Snippets are limited to 10,000 lines. Consider splitting into multiple snippets." in errors_on(
+               changeset
+             ).code
+    end
+
     test "associates snippet with user when provided" do
       user = user_fixture()
       changeset = Snippet.create_changeset(%Snippet{}, %{code: "code"}, user)
@@ -103,6 +115,19 @@ defmodule ReviewRoom.Snippets.SnippetTest do
 
       refute changeset.valid?
       assert "can't be blank" in errors_on(changeset).code
+    end
+
+    test "rejects updates that exceed 10,000 lines" do
+      snippet = snippet_fixture()
+      code = Enum.map_join(1..10_001, "\n", &"line #{&1}")
+
+      changeset = Snippet.update_changeset(snippet, %{code: code})
+
+      refute changeset.valid?
+
+      assert "Snippets are limited to 10,000 lines. Consider splitting into multiple snippets." in errors_on(
+               changeset
+             ).code
     end
   end
 end

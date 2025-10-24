@@ -5,6 +5,13 @@ defmodule ReviewRoomWeb.SnippetLive.Show do
   alias ReviewRoom.Snippets
   alias ReviewRoom.Snippets.PresenceTracker
 
+  @moduledoc """
+  Displays an individual snippet with collaborative enhancements including syntax highlighting,
+  presence-aware cursors, clipboard shortcuts, and resilient reconnection handling.
+  """
+
+  @cursor_throttle_ms 75
+
   @impl true
   def mount(%{"id" => id}, session, socket) do
     snippet = Snippets.get_snippet!(id)
@@ -19,7 +26,12 @@ defmodule ReviewRoomWeb.SnippetLive.Show do
         presences: %{},
         user_id: nil,
         current_user: current_user,
-        can_edit?: Snippets.can_edit?(scope, snippet)
+        can_edit?: Snippets.can_edit?(scope, snippet),
+        connection_status: :connected,
+        viewer_meta: nil,
+        last_cursor: nil,
+        last_selection: nil,
+        last_cursor_update_at: nil
       )
 
     socket =
@@ -33,14 +45,18 @@ defmodule ReviewRoomWeb.SnippetLive.Show do
         identity = build_presence_identity(socket, user_id, presences_before)
         color = assign_random_color()
 
+        viewer_meta = %{
+          display_name: identity.display_name,
+          anonymous_number: identity.anonymous_number,
+          color: color
+        }
+
         {:ok, _ref} =
-          PresenceTracker.track_user(id, user_id, %{
-            display_name: identity.display_name,
-            anonymous_number: identity.anonymous_number,
-            color: color,
-            cursor: nil,
-            selection: nil
-          })
+          PresenceTracker.track_user(
+            id,
+            user_id,
+            Map.merge(viewer_meta, %{cursor: nil, selection: nil})
+          )
 
         # Load initial presences
         presences = PresenceTracker.list_presences(id)
@@ -48,6 +64,7 @@ defmodule ReviewRoomWeb.SnippetLive.Show do
         socket
         |> assign(presences: presences)
         |> assign(user_id: user_id)
+        |> assign(viewer_meta: viewer_meta)
       else
         socket
       end
@@ -96,24 +113,67 @@ defmodule ReviewRoomWeb.SnippetLive.Show do
             </div>
 
             <div
+              :if={@connection_status == :reconnecting}
+              class="absolute inset-0 z-20 flex items-center justify-center bg-white/80 backdrop-blur-sm"
+              role="status"
+              aria-live="polite"
+            >
+              <div class="inline-flex items-center gap-3 rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow">
+                <.icon name="hero-arrow-path" class="h-4 w-4 animate-spin text-blue-500" />
+                <span>Reconnecting&hellip;</span>
+              </div>
+            </div>
+
+            <% lines = String.split(@snippet.code || "", "\n") %>
+            <div
               id="code-display"
               phx-hook="SyntaxHighlight"
               phx-update="ignore"
-              class="rounded-lg overflow-hidden border border-gray-200 relative z-0"
+              class="relative z-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-950 shadow-sm"
             >
-              <pre class="p-4 bg-gray-50 overflow-x-auto"><code class={language_class(@snippet.language)}><%= @snippet.code %></code></pre>
+              <div class="flex text-[13px] leading-6 text-slate-100">
+                <div class="hidden select-none border-r border-slate-800/60 bg-slate-950/60 px-4 py-4 text-right font-mono text-[11px] uppercase tracking-wide text-slate-500 sm:block">
+                  <div
+                    :for={{_line, index} <- Enum.with_index(lines, 1)}
+                    data-role="line-number"
+                    class="tabular-nums"
+                  >
+                    {index}
+                  </div>
+                </div>
+                <div class="w-full overflow-auto">
+                  <pre
+                    phx-no-curly-interpolation
+                    class="min-h-[320px] bg-transparent px-4 py-4 font-mono text-sm text-slate-100"
+                  ><code class={[
+                    "block min-w-full whitespace-pre",
+                    language_class(@snippet.language)
+                  ]}><%= @snippet.code %></code></pre>
+                </div>
+              </div>
             </div>
           </div>
 
           <button
             type="button"
-            phx-click={JS.dispatch("phx:copy", to: "#snippet-code-content")}
-            class="absolute top-2 right-2 px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-50 z-20"
+            phx-hook="ClipboardCopy"
+            data-clipboard-target="#snippet-code-content"
+            data-state="default"
+            id="snippet-copy-button"
+            class="absolute right-3 top-3 z-30 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-4 py-1.5 text-xs font-semibold text-slate-600 shadow transition hover:translate-y-[-1px] hover:border-blue-200 hover:text-blue-600"
           >
-            Copy
+            <span data-default-state class="flex items-center gap-2">
+              <.icon name="hero-clipboard" class="h-3.5 w-3.5" /> Copy
+            </span>
+            <span data-success-state class="hidden items-center gap-2 text-emerald-600">
+              <.icon name="hero-check" class="h-3.5 w-3.5" /> Copied!
+            </span>
+            <span data-error-state class="hidden items-center gap-2 text-red-500">
+              <.icon name="hero-exclamation-triangle" class="h-3.5 w-3.5" /> Retry
+            </span>
           </button>
 
-          <div id="snippet-code-content" class="hidden">{@snippet.code}</div>
+          <div id="snippet-code-content" class="sr-only" aria-hidden="true">{@snippet.code}</div>
         </div>
 
         <%!-- Polished Presence List --%>
@@ -221,7 +281,11 @@ defmodule ReviewRoomWeb.SnippetLive.Show do
 
   @impl true
   def handle_event("cursor_moved", %{"line" => line, "column" => column}, socket) do
-    if socket.assigns.user_id do
+    socket = assign(socket, :last_cursor, %{line: line, column: column})
+
+    if rate_limited?(socket) or is_nil(socket.assigns.user_id) do
+      {:noreply, socket}
+    else
       user_id = socket.assigns.user_id
       snippet_id = socket.assigns.snippet.id
 
@@ -229,23 +293,27 @@ defmodule ReviewRoomWeb.SnippetLive.Show do
         PresenceTracker.update_cursor(snippet_id, user_id, %{
           cursor: %{line: line, column: column}
         })
-    end
 
-    {:noreply, socket}
+      {:noreply, assign(socket, :last_cursor_update_at, System.monotonic_time(:millisecond))}
+    end
   end
 
   @impl true
   def handle_event("text_selected", %{"start" => start, "end" => end_pos}, socket) do
+    selection = %{
+      start: %{line: start["line"], column: start["column"]},
+      end: %{line: end_pos["line"], column: end_pos["column"]}
+    }
+
+    socket = assign(socket, :last_selection, selection)
+
     if socket.assigns.user_id do
       user_id = socket.assigns.user_id
       snippet_id = socket.assigns.snippet.id
 
       {:ok, _ref} =
         PresenceTracker.update_cursor(snippet_id, user_id, %{
-          selection: %{
-            start: %{line: start["line"], column: start["column"]},
-            end: %{line: end_pos["line"], column: end_pos["column"]}
-          }
+          selection: selection
         })
     end
 
@@ -254,6 +322,8 @@ defmodule ReviewRoomWeb.SnippetLive.Show do
 
   @impl true
   def handle_event("selection_cleared", _params, socket) do
+    socket = assign(socket, :last_selection, nil)
+
     if socket.assigns.user_id do
       user_id = socket.assigns.user_id
       snippet_id = socket.assigns.snippet.id
@@ -263,6 +333,20 @@ defmodule ReviewRoomWeb.SnippetLive.Show do
           selection: nil
         })
     end
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("connection_status", %{"status" => "disconnected"}, socket) do
+    {:noreply, assign(socket, :connection_status, :reconnecting)}
+  end
+
+  def handle_event("connection_status", %{"status" => "connected"}, socket) do
+    socket =
+      socket
+      |> maybe_restore_presence()
+      |> assign(:connection_status, :connected)
 
     {:noreply, socket}
   end
@@ -314,6 +398,45 @@ defmodule ReviewRoomWeb.SnippetLive.Show do
     else
       {:noreply, socket}
     end
+  end
+
+  defp rate_limited?(socket) do
+    now = System.monotonic_time(:millisecond)
+
+    case socket.assigns[:last_cursor_update_at] do
+      nil -> false
+      last when is_integer(last) -> now - last < @cursor_throttle_ms
+    end
+  end
+
+  defp maybe_restore_presence(%{assigns: %{user_id: nil}} = socket), do: socket
+
+  defp maybe_restore_presence(%{assigns: %{user_id: _user_id, viewer_meta: nil}} = socket) do
+    snippet_id = socket.assigns.snippet.id
+    presences = PresenceTracker.list_presences(snippet_id)
+    assign(socket, :presences, presences)
+  end
+
+  defp maybe_restore_presence(socket) do
+    snippet_id = socket.assigns.snippet.id
+    user_id = socket.assigns.user_id
+    viewer_meta = socket.assigns.viewer_meta
+
+    metadata =
+      viewer_meta
+      |> Map.merge(%{
+        cursor: socket.assigns.last_cursor,
+        selection: socket.assigns.last_selection
+      })
+
+    result = PresenceTracker.update_cursor(snippet_id, user_id, metadata)
+
+    case result do
+      {:ok, _ref} -> :ok
+      {:error, _reason} -> PresenceTracker.track_user(snippet_id, user_id, metadata)
+    end
+
+    assign(socket, :presences, PresenceTracker.list_presences(snippet_id))
   end
 
   defp language_class(nil), do: ""

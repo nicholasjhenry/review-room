@@ -5,6 +5,11 @@ defmodule ReviewRoomWeb.SnippetLive.New do
   alias ReviewRoom.Snippets.Snippet
   alias ReviewRoomWeb.SnippetLive.Components
 
+  @moduledoc """
+  LiveView for composing new snippets with rich form styling, validation feedback,
+  and tailored loading states for a responsive authoring workflow.
+  """
+
   @impl true
   def mount(_params, _session, socket) do
     changeset = Snippets.change_snippet(%Snippet{})
@@ -35,7 +40,10 @@ defmodule ReviewRoomWeb.SnippetLive.New do
          |> push_navigate(to: ~p"/s/#{snippet.id}")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign(socket, form: to_form(changeset))}
+        {:noreply,
+         socket
+         |> put_flash(:error, "Unable to create snippet. Please fix the errors and try again.")
+         |> assign(form: to_form(changeset))}
     end
   end
 

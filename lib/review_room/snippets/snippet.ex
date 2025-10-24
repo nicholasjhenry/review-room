@@ -2,6 +2,13 @@ defmodule ReviewRoom.Snippets.Snippet do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @moduledoc """
+  Defines snippet persistence with nanoid identifiers, content validation, and visibility rules
+  shared across the collaborative snippet experience.
+  """
+
+  @max_line_count 10_000
+
   @type t :: %__MODULE__{
           id: String.t() | nil,
           code: String.t() | nil,
@@ -69,6 +76,7 @@ defmodule ReviewRoom.Snippets.Snippet do
     snippet
     |> cast(attrs, [:code, :title, :description, :language, :visibility])
     |> validate_required([:code])
+    |> validate_line_count()
     |> validate_length(:title, max: 200)
     |> validate_inclusion(:language, supported_languages())
     |> validate_inclusion(:visibility, [:public, :private])
@@ -86,6 +94,7 @@ defmodule ReviewRoom.Snippets.Snippet do
     snippet
     |> cast(attrs, [:code, :title, :description, :language, :visibility])
     |> validate_required([:code])
+    |> validate_line_count()
     |> validate_length(:title, max: 200)
     |> validate_inclusion(:language, supported_languages())
     |> validate_inclusion(:visibility, [:public, :private])
@@ -100,6 +109,26 @@ defmodule ReviewRoom.Snippets.Snippet do
 
   defp put_user(changeset, nil), do: changeset
   defp put_user(changeset, user), do: put_assoc(changeset, :user, user)
+
+  defp validate_line_count(changeset) do
+    case get_field(changeset, :code) do
+      code when is_binary(code) ->
+        line_count = code |> String.split("\n", trim: false) |> length()
+
+        if line_count > @max_line_count do
+          add_error(
+            changeset,
+            :code,
+            "Snippets are limited to 10,000 lines. Consider splitting into multiple snippets."
+          )
+        else
+          changeset
+        end
+
+      _ ->
+        changeset
+    end
+  end
 
   @doc "Supported language identifiers for snippets."
   @spec supported_languages() :: [String.t() | nil]

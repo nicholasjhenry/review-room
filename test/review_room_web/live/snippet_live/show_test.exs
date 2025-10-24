@@ -48,6 +48,28 @@ defmodule ReviewRoomWeb.SnippetLive.ShowTest do
       # Check for syntax highlighting hook
       assert has_element?(view, "#code-display[phx-hook='SyntaxHighlight']")
       assert has_element?(view, "code.language-ruby")
+      assert has_element?(view, "button[phx-hook='ClipboardCopy']")
+    end
+
+    test "renders line numbers alongside code", %{conn: conn} do
+      snippet = snippet_fixture(%{code: "line 1\nline 2"})
+
+      {:ok, view, _html} = live(conn, ~p"/s/#{snippet.id}")
+
+      assert has_element?(view, "[data-role='line-number']", "1")
+      assert has_element?(view, "[data-role='line-number']", "2")
+    end
+
+    test "renders unicode and special HTML characters safely", %{conn: conn} do
+      snippet =
+        snippet_fixture(%{
+          code: "<div>{@foo}</div>\nIO.puts(\"Привет 🌍\")"
+        })
+
+      {:ok, _view, html} = live(conn, ~p"/s/#{snippet.id}")
+
+      assert html =~ "&lt;div&gt;{@foo}&lt;/div&gt;"
+      assert html =~ "Привет 🌍"
     end
 
     test "displays title and description when provided", %{conn: conn} do
@@ -106,6 +128,27 @@ defmodule ReviewRoomWeb.SnippetLive.ShowTest do
       assert view
              |> element("#code-display")
              |> render() =~ "phx-update=\"ignore\""
+    end
+
+    test "shows reconnect overlay and restores cursor metadata", %{conn: conn} do
+      snippet = snippet_fixture(%{code: "line 1\nline 2"})
+
+      {:ok, view, _html} = live(conn, ~p"/s/#{snippet.id}")
+
+      render_hook(view, "cursor_moved", %{"line" => 3, "column" => 7})
+      :timer.sleep(50)
+
+      render_hook(view, "connection_status", %{"status" => "disconnected"})
+      html = render(view)
+      assert html =~ "Reconnecting"
+
+      render_hook(view, "connection_status", %{"status" => "connected"})
+      :timer.sleep(50)
+
+      presences = ReviewRoom.Snippets.PresenceTracker.list_presences(snippet.id)
+      [user_id] = Map.keys(presences)
+      [meta] = presences[user_id].metas
+      assert meta.cursor == %{line: 3, column: 7}
     end
   end
 
@@ -362,6 +405,32 @@ defmodule ReviewRoomWeb.SnippetLive.ShowTest do
       # Verify presence tracking started
       presences = ReviewRoom.Snippets.PresenceTracker.list_presences(snippet.id)
       assert map_size(presences) == 1
+    end
+
+    test "throttles rapid cursor updates server-side", %{conn: conn} do
+      snippet = snippet_fixture(%{code: "test code"})
+
+      {:ok, view, _html} = live(conn, ~p"/s/#{snippet.id}")
+
+      render_hook(view, "cursor_moved", %{"line" => 1, "column" => 1})
+      render_hook(view, "cursor_moved", %{"line" => 1, "column" => 5})
+
+      :timer.sleep(50)
+
+      presences = ReviewRoom.Snippets.PresenceTracker.list_presences(snippet.id)
+      [user_id] = Map.keys(presences)
+      [meta] = presences[user_id].metas
+      assert meta.cursor == %{line: 1, column: 1}
+
+      :timer.sleep(120)
+      render_hook(view, "cursor_moved", %{"line" => 2, "column" => 3})
+      :timer.sleep(60)
+
+      presences = ReviewRoom.Snippets.PresenceTracker.list_presences(snippet.id)
+      [meta_after] = presences[user_id].metas
+      assert meta_after.cursor == %{line: 2, column: 3}
+
+      GenServer.stop(view.pid, :normal)
     end
   end
 end

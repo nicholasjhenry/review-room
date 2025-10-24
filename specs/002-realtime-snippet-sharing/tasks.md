@@ -399,59 +399,59 @@
 
 ### Additional Features
 
-- [ ] T062 [P] Add line numbers to code display in SnippetLive.Show template
+- [x] T062 [P] Add line numbers to code display in SnippetLive.Show template
   - CSS for line number column
   - Generate line numbers from code content
-- [ ] T063 [P] Add copy-to-clipboard button in SnippetLive.Show template
+- [x] T063 [P] Add copy-to-clipboard button in SnippetLive.Show template
   - Button with clipboard icon
   - JavaScript to copy code content
   - Show "Copied!" feedback message
-- [ ] T064 [P] Implement graceful reconnection handling in SnippetLive.Show
+- [x] T064 [P] Implement graceful reconnection handling in SnippetLive.Show
   - handle_info after disconnect restores presence
   - Show "Reconnecting..." UI during disconnect
   - Restore cursor/selection state after reconnect
 
 ### Error Handling & Edge Cases
 
-- [ ] T065 [P] Add error handling for large snippets (>10,000 lines)
+- [x] T065 [P] Add error handling for large snippets (>10,000 lines)
   - Validation in changeset
   - User-friendly error message
   - Suggest splitting into multiple snippets
-- [ ] T066 [P] Handle special characters and unicode in code content
+- [x] T066 [P] Handle special characters and unicode in code content
   - Test with unicode characters
   - Test with special HTML characters (<, >, &)
   - Ensure proper escaping in templates
-- [ ] T067 [P] Add rate limiting to cursor updates
+- [x] T067 [P] Add rate limiting to cursor updates
   - Client-side throttle already at 100ms (T029)
   - Optional server-side rate limit if needed
 
 ### UI/UX Polish
 
-- [ ] T068 [P] Style all LiveView pages with Tailwind CSS
+- [x] T068 [P] Style all LiveView pages with Tailwind CSS
   - Forms with proper spacing and labels
   - Buttons with hover states
   - Cards for snippet display
   - Responsive design for mobile
-- [ ] T069 [P] Add loading states to LiveViews
+- [x] T069 [P] Add loading states to LiveViews
   - Skeleton loaders during initial mount
   - Spinner for save/delete operations
   - Disabled buttons during submission
-- [ ] T070 [P] Add flash messages for all operations
+- [x] T070 [P] Add flash messages for all operations
   - Success: "Snippet created", "Snippet updated", etc.
   - Errors: "Unable to create snippet", etc.
   - Info: "Snippet deleted by owner"
 
 ### Testing & Validation
 
-- [ ] T071 [P] Run all tests with mix test
+- [x] T071 [P] Run all tests with mix test
   - Verify all tests pass
   - Check coverage with mix test --cover
-- [ ] T072 [P] Run mix precommit (Constitution Principle V)
+- [x] T072 [P] Run mix precommit (Constitution Principle V)
   - Compile with --warning-as-errors
   - Format code with mix format
   - Check unused dependencies
   - Run all tests
-- [ ] T073 Validate quickstart.md scenarios
+- [x] T073 Validate quickstart.md scenarios
   - Create snippet and share link (US1)
   - Open in 2 browsers, verify cursor sync (US2)
   - Verify presence list updates (US3)
@@ -461,11 +461,11 @@
 
 ### Documentation
 
-- [ ] T074 [P] Add inline documentation to modules
+- [x] T074 [P] Add inline documentation to modules
   - @moduledoc for all public modules
   - @doc for all public functions
   - @spec for all public functions (Constitution Principle III)
-- [ ] T075 [P] Update README.md with feature description
+- [x] T075 [P] Update README.md with feature description
   - How to create snippets
   - How to collaborate in real-time
   - How to browse public gallery

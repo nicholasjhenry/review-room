@@ -6,6 +6,11 @@ defmodule ReviewRoomWeb.SnippetLive.Edit do
   alias ReviewRoom.Snippets.Snippet
   alias ReviewRoomWeb.SnippetLive.Components
 
+  @moduledoc """
+  LiveView for editing existing snippets with authorization safeguards,
+  optimistic UI updates, and polished form interactions.
+  """
+
   @impl true
   def mount(%{"id" => id}, _session, socket) do
     snippet = Snippets.get_snippet!(id)
@@ -57,7 +62,10 @@ defmodule ReviewRoomWeb.SnippetLive.Edit do
          |> push_navigate(to: ~p"/s/#{updated.id}")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign(socket, :form, to_form(changeset))}
+        {:noreply,
+         socket
+         |> put_flash(:error, "Unable to update snippet. Please fix the highlighted issues.")
+         |> assign(:form, to_form(changeset))}
 
       {:error, :unauthorized} ->
         {:noreply,

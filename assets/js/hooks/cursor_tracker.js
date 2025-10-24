@@ -9,19 +9,27 @@ const CursorTracker = {
   mounted() {
     this.throttleDelay = 100; // 100ms throttle for cursor updates
     this.lastCursorUpdate = 0;
+    this.connectionState = "connected";
 
     // Add event listeners
     this.handleMouseMove = this.throttledCursorMove.bind(this);
     this.handleMouseUp = this.handleSelection.bind(this);
+    this.handleConnectionLost = this.notifyDisconnected.bind(this);
+    this.handleConnectionRestored = this.notifyConnected.bind(this);
 
     this.el.addEventListener('mousemove', this.handleMouseMove);
     this.el.addEventListener('mouseup', this.handleMouseUp);
+    window.addEventListener('phx:disconnected', this.handleConnectionLost);
+    window.addEventListener('phx:connected', this.handleConnectionRestored);
   },
 
   destroyed() {
     // Clean up event listeners
     this.el.removeEventListener('mousemove', this.handleMouseMove);
     this.el.removeEventListener('mouseup', this.handleMouseUp);
+    window.removeEventListener('phx:disconnected', this.handleConnectionLost);
+    window.removeEventListener('phx:connected', this.handleConnectionRestored);
+    this.connectionState = null;
   },
 
   /**
@@ -207,6 +215,20 @@ const CursorTracker = {
     }
 
     return null;
+  },
+
+  notifyDisconnected() {
+    if (this.connectionState !== "disconnected") {
+      this.connectionState = "disconnected";
+      this.pushEvent('connection_status', { status: 'disconnected' });
+    }
+  },
+
+  notifyConnected() {
+    if (this.connectionState !== "connected") {
+      this.connectionState = "connected";
+      this.pushEvent('connection_status', { status: 'connected' });
+    }
   }
 };
 

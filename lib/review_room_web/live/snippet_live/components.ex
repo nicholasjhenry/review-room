@@ -94,8 +94,19 @@ defmodule ReviewRoomWeb.SnippetLive.Components do
         </div>
 
         <div class="flex flex-wrap gap-4">
-          <.button type="submit" phx-disable-with={@submit_disable_with} class={@button_class}>
-            {@submit_label}
+          <.button
+            type="submit"
+            data-loading-button="true"
+            class={"inline-flex items-center justify-center gap-2 #{@button_class}"}
+          >
+            <span class="submit-default-label inline-flex items-center gap-2">
+              <.icon name="hero-code-bracket" class="h-4 w-4" />
+              {@submit_label}
+            </span>
+            <span class="submit-loading-label hidden items-center gap-2">
+              <.icon name="hero-arrow-path" class="h-4 w-4 animate-spin" />
+              {@submit_disable_with}
+            </span>
           </.button>
 
           <.link
@@ -114,6 +125,7 @@ defmodule ReviewRoomWeb.SnippetLive.Components do
             phx-disable-with={@delete_disable_with}
             phx-confirm={@delete_confirm}
             class="inline-flex items-center justify-center rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-100 transition"
+            phx-click-loading="opacity-60 cursor-not-allowed"
           >
             Delete snippet
           </button>

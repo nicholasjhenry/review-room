@@ -69,5 +69,6 @@ defmodule ReviewRoomWeb.SnippetLive.EditTest do
       |> render_submit()
 
     assert html =~ "can&#39;t be blank"
+    assert html =~ "Unable to update snippet"
   end
 end

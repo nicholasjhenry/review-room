@@ -109,3 +109,17 @@
 }
 
 /* This file is for your main application CSS */
+
+form.phx-submit-loading [data-loading-button] {
+  opacity: 0.8;
+  pointer-events: none;
+  cursor: wait;
+}
+
+form.phx-submit-loading [data-loading-button] .submit-default-label {
+  display: none;
+}
+
+form.phx-submit-loading [data-loading-button] .submit-loading-label {
+  display: inline-flex;
+}
