@@ -9,6 +9,9 @@
 /* Import highlight.js theme for syntax highlighting */
 @import "highlight.js/styles/github-dark.css";
 
+/* Spec 003 design system tokens and DaisyUI overrides */
+@import "./design-system.css";
+
 /* A Tailwind plugin that makes "hero-#{ICON}" classes available.
    The heroicons installation itself is managed by your mix.exs */
 @plugin "../vendor/heroicons";
@@ -111,15 +114,15 @@
 /* This file is for your main application CSS */
 
 form.phx-submit-loading [data-loading-button] {
-  opacity: 0.8;
-  pointer-events: none;
-  cursor: wait;
+    opacity: 0.8;
+    pointer-events: none;
+    cursor: wait;
 }
 
 form.phx-submit-loading [data-loading-button] .submit-default-label {
-  display: none;
+    display: none;
 }
 
 form.phx-submit-loading [data-loading-button] .submit-loading-label {
-  display: inline-flex;
+    display: inline-flex;
 }

@@ -11,12 +11,12 @@
 
 ## Phase 2 – Foundational Work
 
-- [ ] T003 Create lib/review_room_web/components/design_system directory
-- [ ] T004 Add design system token module in lib/review_room_web/components/design_system/tokens.ex
-- [ ] T005 Update assets/css/app.css to import new design-system.css and DaisyUI theme overrides
-- [ ] T006 Add design-system CSS variables and theme definitions to assets/css/design-system.css
-- [ ] T007 Extend assets/js/app.js with hooks scaffold for micro-interactions (clipboard, filter panel)
-- [ ] T008 Seed test helpers for LazyHTML snapshots in test/support/design_system_case.ex
+- [x] T003 Create lib/review_room_web/components/design_system directory
+- [x] T004 Add design system token module in lib/review_room_web/components/design_system/tokens.ex
+- [x] T005 Update assets/css/app.css to import new design-system.css and DaisyUI theme overrides
+- [x] T006 Add design-system CSS variables and theme definitions to assets/css/design-system.css
+- [x] T007 Extend assets/js/app.js with hooks scaffold for micro-interactions (clipboard, filter panel)
+- [x] T008 Seed test helpers for LazyHTML snapshots in test/support/design_system_case.ex
 
 ## Phase 3 – User Story 1 (Delightful Snippet Discovery, P1)
 
