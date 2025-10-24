@@ -25,6 +25,7 @@ defmodule ReviewRoomWeb.Router do
     # Public snippet routes (no auth required)
     live_session :public_snippets,
       on_mount: [{ReviewRoomWeb.UserAuth, :mount_current_scope}] do
+      live "/snippets", SnippetLive.Index, :index
       live "/s/:id", SnippetLive.Show, :show
       live "/snippets/new", SnippetLive.New, :new
     end

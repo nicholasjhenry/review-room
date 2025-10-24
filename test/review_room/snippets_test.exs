@@ -7,6 +7,8 @@ defmodule ReviewRoom.SnippetsTest do
 
   import ReviewRoom.AccountsFixtures
   import ReviewRoom.SnippetsFixtures
+  import Ecto.Changeset
+  alias ReviewRoom.Repo
 
   describe "create_snippet/2" do
     test "creates snippet with valid attributes" do
@@ -162,5 +164,99 @@ defmodule ReviewRoom.SnippetsTest do
 
       assert Enum.map(results, & &1.id) == [owner_snippet.id]
     end
+  end
+
+  describe "public snippet discovery" do
+    test "list_public_snippets/1 returns only public snippets in reverse chronological order" do
+      now = DateTime.utc_now()
+      user = user_fixture()
+
+      public_with_user =
+        snippet_fixture_with_user(user, %{visibility: :public, title: "Owned Public"})
+        |> set_inserted_at(DateTime.add(now, -10, :second))
+
+      older_public =
+        snippet_fixture(%{visibility: :public, title: "Older Public"})
+        |> set_inserted_at(DateTime.add(now, -30, :second))
+
+      newer_public =
+        snippet_fixture(%{visibility: :public, title: "Newer Public"})
+        |> set_inserted_at(DateTime.add(now, -5, :second))
+
+      snippet_fixture(%{visibility: :private, title: "Private"})
+
+      results = Snippets.list_public_snippets(limit: 5)
+
+      assert Enum.map(results, & &1.id) == [newer_public.id, public_with_user.id, older_public.id]
+      assert Enum.at(results, 1).user.id == user.id
+    end
+
+    test "list_public_snippets/1 filters by language" do
+      snippet_fixture(%{visibility: :public, language: "elixir", title: "Elixir Snippet"})
+
+      python =
+        snippet_fixture(%{visibility: :public, language: "python", title: "Python Snippet"})
+
+      results = Snippets.list_public_snippets(language: "python")
+
+      assert Enum.map(results, & &1.id) == [python.id]
+    end
+
+    test "list_public_snippets/1 supports cursor pagination" do
+      now = DateTime.utc_now()
+
+      oldest =
+        snippet_fixture(%{visibility: :public, title: "Oldest"})
+        |> set_inserted_at(DateTime.add(now, -120, :second))
+
+      middle =
+        snippet_fixture(%{visibility: :public, title: "Middle"})
+        |> set_inserted_at(DateTime.add(now, -60, :second))
+
+      newest =
+        snippet_fixture(%{visibility: :public, title: "Newest"})
+        |> set_inserted_at(DateTime.add(now, -30, :second))
+
+      first_page = Snippets.list_public_snippets(limit: 2)
+      assert Enum.map(first_page, & &1.id) == [newest.id, middle.id]
+
+      last_snippet = List.last(first_page)
+      cursor = {last_snippet.inserted_at, last_snippet.id}
+
+      second_page = Snippets.list_public_snippets(limit: 2, cursor: cursor)
+      assert Enum.map(second_page, & &1.id) == [oldest.id]
+    end
+
+    test "search_snippets/2 matches against title and description" do
+      matching_title =
+        snippet_fixture(%{
+          visibility: :public,
+          title: "Phoenix Pattern Matching",
+          description: ""
+        })
+
+      matching_description =
+        snippet_fixture(%{
+          visibility: :public,
+          title: "Another",
+          description: "A guide to Phoenix LiveView"
+        })
+
+      snippet_fixture(%{visibility: :public, title: "Irrelevant"})
+      snippet_fixture(%{visibility: :private, title: "Phoenix Secret"})
+
+      results = Snippets.search_snippets("phoenix", limit: 5)
+
+      result_ids = results |> Enum.map(& &1.id) |> Enum.sort()
+      expected_ids = [matching_description.id, matching_title.id] |> Enum.sort()
+
+      assert result_ids == expected_ids
+    end
+  end
+
+  defp set_inserted_at(snippet, datetime) do
+    snippet
+    |> change(inserted_at: DateTime.truncate(datetime, :second))
+    |> Repo.update!()
   end
 end

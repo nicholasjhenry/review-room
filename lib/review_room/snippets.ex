@@ -8,6 +8,9 @@ defmodule ReviewRoom.Snippets do
   alias ReviewRoom.Repo
   alias ReviewRoom.Snippets.Snippet
 
+  @gallery_default_limit 20
+  @gallery_max_limit 50
+
   @doc """
   Creates a snippet.
 
@@ -136,6 +139,61 @@ defmodule ReviewRoom.Snippets do
   end
 
   @doc """
+  Lists public snippets for the discovery gallery.
+  """
+  @spec list_public_snippets(keyword()) :: [Snippet.t()]
+  def list_public_snippets(opts \\ []) do
+    opts = normalize_gallery_opts(opts)
+
+    Snippet
+    |> public_scope(opts.language)
+    |> apply_cursor(opts.cursor)
+    |> order_and_limit(opts.limit)
+    |> preload(:user)
+    |> Repo.all()
+  end
+
+  @doc """
+  Searches public snippets by title and description terms.
+  """
+  @spec search_snippets(String.t(), keyword()) :: [Snippet.t()]
+  def search_snippets(query_string, opts \\ [])
+
+  def search_snippets(query_string, opts) when is_binary(query_string) do
+    trimmed = String.trim(query_string)
+    opts = normalize_gallery_opts(opts)
+
+    if trimmed == "" do
+      list_public_snippets(opts)
+    else
+      pattern = "%#{escape_like(trimmed)}%"
+
+      Snippet
+      |> public_scope(opts.language)
+      |> where(
+        [s],
+        fragment("COALESCE(?, '') ILIKE ? ESCAPE '\\'", s.title, ^pattern) or
+          fragment("COALESCE(?, '') ILIKE ? ESCAPE '\\'", s.description, ^pattern)
+      )
+      |> apply_cursor(opts.cursor)
+      |> order_and_limit(opts.limit)
+      |> preload(:user)
+      |> Repo.all()
+    end
+  end
+
+  def search_snippets(_query, opts), do: list_public_snippets(opts)
+
+  @doc """
+  Returns the list of supported languages for snippet filters.
+  """
+  @spec supported_languages() :: [String.t()]
+  def supported_languages do
+    Snippet.supported_languages()
+    |> Enum.reject(&is_nil/1)
+  end
+
+  @doc """
   Toggles a snippet's visibility between :public and :private.
   """
   @spec toggle_visibility(Scope.t() | nil, Snippet.t()) ::
@@ -177,4 +235,134 @@ defmodule ReviewRoom.Snippets do
 
   defp matches_snippet_owner?(%User{id: user_id}, %Snippet{user_id: user_id}), do: true
   defp matches_snippet_owner?(_, _), do: false
+
+  defp normalize_gallery_opts(opts) do
+    limit =
+      opts
+      |> Keyword.get(:limit, @gallery_default_limit)
+      |> clamp_limit()
+
+    language =
+      opts
+      |> Keyword.get(:language)
+      |> normalize_language()
+
+    cursor =
+      opts
+      |> Keyword.get(:cursor)
+      |> normalize_cursor()
+
+    %{limit: limit, language: language, cursor: cursor}
+  end
+
+  defp clamp_limit(limit) when is_integer(limit) and limit > 0 do
+    min(limit, @gallery_max_limit)
+  end
+
+  defp clamp_limit(_), do: @gallery_default_limit
+
+  defp normalize_language(language) when language in [nil, ""], do: nil
+
+  defp normalize_language(language) when is_atom(language) do
+    language
+    |> Atom.to_string()
+    |> normalize_language()
+  end
+
+  defp normalize_language(language) when is_binary(language) do
+    normalized = language |> String.trim() |> String.downcase()
+
+    if normalized in supported_languages() do
+      normalized
+    else
+      nil
+    end
+  end
+
+  defp normalize_language(_), do: nil
+
+  defp normalize_cursor(nil), do: nil
+
+  defp normalize_cursor({%DateTime{} = dt, id}) when is_binary(id) do
+    {DateTime.truncate(dt, :second), id}
+  end
+
+  defp normalize_cursor({%NaiveDateTime{} = dt, id}) when is_binary(id) do
+    dt
+    |> DateTime.from_naive!("Etc/UTC")
+    |> DateTime.truncate(:second)
+    |> then(&{&1, id})
+  end
+
+  defp normalize_cursor({inserted_at, id}) when is_binary(id) do
+    case normalize_cursor(inserted_at) do
+      nil -> nil
+      {dt, _} -> {dt, id}
+    end
+  end
+
+  defp normalize_cursor(%DateTime{} = dt), do: {DateTime.truncate(dt, :second), ""}
+
+  defp normalize_cursor(%NaiveDateTime{} = dt) do
+    dt
+    |> DateTime.from_naive!("Etc/UTC")
+    |> DateTime.truncate(:second)
+    |> then(&{&1, ""})
+  end
+
+  defp normalize_cursor(binary) when is_binary(binary) do
+    case String.split(binary, "::", parts: 2) do
+      [iso, id] ->
+        with {:ok, dt, 0} <- DateTime.from_iso8601(iso) do
+          {DateTime.truncate(dt, :second), id}
+        else
+          _ -> nil
+        end
+
+      [iso] ->
+        with {:ok, dt, 0} <- DateTime.from_iso8601(iso) do
+          {DateTime.truncate(dt, :second), ""}
+        else
+          _ -> nil
+        end
+    end
+  end
+
+  defp normalize_cursor(_), do: nil
+
+  defp public_scope(query, language) do
+    query = from s in query, where: s.visibility == :public
+
+    if language do
+      from s in query, where: s.language == ^language
+    else
+      query
+    end
+  end
+
+  defp apply_cursor(query, nil), do: query
+
+  defp apply_cursor(query, {cursor_dt, ""}) do
+    from s in query, where: s.inserted_at < ^cursor_dt
+  end
+
+  defp apply_cursor(query, {cursor_dt, cursor_id}) do
+    from s in query,
+      where:
+        s.inserted_at < ^cursor_dt or
+          (s.inserted_at == ^cursor_dt and s.id < ^cursor_id)
+  end
+
+  defp order_and_limit(query, limit) do
+    from s in query,
+      order_by: [desc: s.inserted_at, desc: s.id],
+      limit: ^limit
+  end
+
+  defp escape_like(term) do
+    term
+    |> String.replace("\\", "\\\\")
+    |> String.replace("%", "\\%")
+    |> String.replace("_", "\\_")
+  end
 end
