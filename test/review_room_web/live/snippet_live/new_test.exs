@@ -83,6 +83,7 @@ defmodule ReviewRoomWeb.SnippetLive.NewTest do
         |> render_submit()
 
       assert html =~ "can&#39;t be blank"
+      assert html =~ "Unable to create snippet"
       # Should stay on same page
       assert has_element?(view, "form#snippet-form")
     end

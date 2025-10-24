@@ -5,6 +5,11 @@ defmodule ReviewRoomWeb.UserSnippetLive.Index do
   alias ReviewRoom.Snippets
   alias ReviewRoom.Snippets.Snippet
 
+  @moduledoc """
+  LiveView dashboard for managing a user’s snippets with visibility toggles, deletion controls,
+  and real-time updates synchronized with collaborative sessions.
+  """
+
   @impl true
   def mount(_params, _session, socket) do
     scope = socket.assigns[:current_scope]
@@ -41,7 +46,7 @@ defmodule ReviewRoomWeb.UserSnippetLive.Index do
       {:noreply,
        socket
        |> stream_delete(:snippets, deleted)
-       |> put_flash(:info, "Snippet deleted")}
+       |> put_flash(:info, "Snippet deleted successfully")}
     else
       {:error, :unauthorized} ->
         {:noreply,
@@ -173,6 +178,7 @@ defmodule ReviewRoomWeb.UserSnippetLive.Index do
                   phx-click="toggle_visibility"
                   phx-value-id={snippet.id}
                   class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-100 transition"
+                  phx-click-loading="opacity-60"
                 >
                   {if snippet.visibility == :public, do: "Make private", else: "Make public"}
                 </button>
@@ -184,6 +190,7 @@ defmodule ReviewRoomWeb.UserSnippetLive.Index do
                   phx-value-id={snippet.id}
                   phx-confirm="Delete this snippet permanently?"
                   class="inline-flex items-center rounded-md border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-100 transition"
+                  phx-click-loading="opacity-60"
                 >
                   Delete
                 </button>

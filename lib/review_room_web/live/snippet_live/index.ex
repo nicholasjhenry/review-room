@@ -4,6 +4,11 @@ defmodule ReviewRoomWeb.SnippetLive.Index do
   alias ReviewRoom.Snippets
   alias ReviewRoom.Snippets.Snippet
 
+  @moduledoc """
+  Public discovery gallery for snippets with filtering, search, responsive layouts, and
+  skeleton loading states for a polished browsing experience.
+  """
+
   @page_size 20
   @language_labels %{
     "css" => "CSS",
@@ -38,6 +43,7 @@ defmodule ReviewRoomWeb.SnippetLive.Index do
       |> assign(:languages, Snippets.supported_languages())
       |> assign(:next_cursor, nil)
       |> assign(:snippets_empty?, true)
+      |> assign(:loading?, true)
       |> stream(:snippets, [], reset: true)
       |> assign_filter_form()
       |> assign_search_form()
@@ -167,6 +173,7 @@ defmodule ReviewRoomWeb.SnippetLive.Index do
               <button
                 type="submit"
                 class="inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+                phx-submit-loading="opacity-75"
               >
                 <.icon name="hero-magnifying-glass" class="h-4 w-4" /> Search
               </button>
@@ -175,11 +182,35 @@ defmodule ReviewRoomWeb.SnippetLive.Index do
                 type="button"
                 phx-click="clear_search"
                 class="inline-flex items-center gap-2 rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:text-slate-800"
+                phx-click-loading="opacity-50"
               >
                 Clear
               </button>
             </div>
           </.form>
+        </div>
+
+        <div :if={@loading?} class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <div
+            :for={index <- 1..6}
+            id={"snippet-gallery-skeleton-#{index}"}
+            class="animate-pulse rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+          >
+            <div class="flex justify-between gap-3">
+              <div class="h-5 w-32 rounded-full bg-slate-200" />
+              <div class="h-5 w-16 rounded-full bg-slate-200" />
+            </div>
+            <div class="mt-4 space-y-3">
+              <div class="h-4 w-full rounded-full bg-slate-100" />
+              <div class="h-4 w-3/4 rounded-full bg-slate-100" />
+              <div class="h-4 w-2/3 rounded-full bg-slate-100" />
+            </div>
+            <div class="mt-6 flex justify-between">
+              <div class="h-4 w-24 rounded-full bg-slate-100" />
+              <div class="h-4 w-20 rounded-full bg-slate-100" />
+            </div>
+            <div class="mt-6 h-9 w-28 rounded-full bg-slate-100" />
+          </div>
         </div>
 
         <div
@@ -191,7 +222,7 @@ defmodule ReviewRoomWeb.SnippetLive.Index do
             id="snippet-gallery-empty"
             class="col-span-full text-center text-sm text-slate-500 italic only:block"
           >
-            <span :if={@snippets_empty?}>
+            <span :if={not @loading? and @snippets_empty?}>
               No public snippets match your filters yet. Toggle the language or clear the search to explore new ideas.
             </span>
           </div>
@@ -248,6 +279,7 @@ defmodule ReviewRoomWeb.SnippetLive.Index do
             phx-click="load_more"
             phx-value-cursor={@next_cursor}
             class="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-400 hover:text-slate-900"
+            phx-click-loading="opacity-60 cursor-progress"
           >
             Load more snippets <.icon name="hero-chevron-double-down" class="h-4 w-4" />
           </button>
@@ -260,6 +292,8 @@ defmodule ReviewRoomWeb.SnippetLive.Index do
   defp refresh_gallery(socket, opts) do
     reset? = Keyword.get(opts, :reset, false)
     cursor = Keyword.get(opts, :cursor)
+
+    socket = if reset?, do: assign(socket, :loading?, true), else: socket
 
     {snippets, next_cursor} = fetch_snippets(socket, cursor: cursor)
 
@@ -274,6 +308,7 @@ defmodule ReviewRoomWeb.SnippetLive.Index do
     |> assign(:next_cursor, next_cursor)
     |> assign(:snippets_empty?, empty_state?)
     |> stream_snippets(snippets, reset?)
+    |> assign(:loading?, false)
   end
 
   defp fetch_snippets(socket, opts) do
