@@ -54,13 +54,13 @@ Provide polished forms, previews, and feedback for snippet creation and manageme
 
 ### Tasks
 
-- [ ] T016 [US2] Author failing LiveView tests for form validation, success feedback, and accessibility in test/review_room_web/live/snippet_form_live_test.exs
-- [ ] T017 [US2] Create form component primitives in lib/review_room_web/components/design_system/form_components.ex
-- [ ] T018 [US2] Update lib/review_room_web/live/snippet_form_live.ex to use new component assigns (form layout, status flags)
-- [ ] T019 [US2] Redesign lib/review_room_web/live/snippet_form_live.html.heex with updated fields, helper text, validation states
-- [ ] T020 [US2] Style form states and toasts in assets/css/design-system.css (form/feedback section)
-- [ ] T021 [US2] Extend assets/js/app.js with clipboard success and reduced-motion handling for form confirmations
-- [ ] T022 [US2] Update quickstart with form testing checklist and contrast ratios (append to specs/003-revamp-ui-design/quickstart.md)
+- [x] T016 [US2] Author failing LiveView tests for form validation, success feedback, and accessibility in test/review_room_web/live/snippet_form_live_test.exs
+- [x] T017 [US2] Create form component primitives in lib/review_room_web/components/design_system/form_components.ex
+- [x] T018 [US2] Update lib/review_room_web/live/snippet_form_live.ex to use new component assigns (form layout, status flags)
+- [x] T019 [US2] Redesign lib/review_room_web/live/snippet_form_live.html.heex with updated fields, helper text, validation states
+- [x] T020 [US2] Style form states and toasts in assets/css/design-system.css (form/feedback section)
+- [x] T021 [US2] Extend assets/js/app.js with clipboard success and reduced-motion handling for form confirmations
+- [x] T022 [US2] Update quickstart with form testing checklist and contrast ratios (append to specs/003-revamp-ui-design/quickstart.md)
 
 ## Phase 5 – User Story 3 (Oriented Application Navigation, P3)
 

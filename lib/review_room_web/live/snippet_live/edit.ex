@@ -5,11 +5,15 @@ defmodule ReviewRoomWeb.SnippetLive.Edit do
   alias ReviewRoom.Snippets
   alias ReviewRoom.Snippets.Snippet
   alias ReviewRoomWeb.SnippetLive.Components
+  alias ReviewRoomWeb.SnippetLive.FormContext
 
   @moduledoc """
   LiveView for editing existing snippets with authorization safeguards,
   optimistic UI updates, and polished form interactions.
   """
+
+  @hero_title "Refine your snippet"
+  @hero_description "Track visibility, validation, and micro-interactions before sharing updates with your team."
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do
@@ -19,11 +23,27 @@ defmodule ReviewRoomWeb.SnippetLive.Edit do
     if Snippets.can_edit?(scope, snippet) do
       changeset = Snippet.update_changeset(snippet, %{})
 
-      {:ok,
-       socket
-       |> assign(:snippet, snippet)
-       |> assign(:page_title, "Edit Snippet")
-       |> assign(:form, to_form(changeset))}
+      socket =
+        socket
+        |> assign(:snippet, snippet)
+        |> assign(:page_title, "Edit Snippet")
+        |> assign(:hero_title, @hero_title)
+        |> assign(:hero_description, @hero_description)
+        |> assign(:share_label, "Share the live snippet URL once saving completes.")
+        |> assign(:share_url, share_url_for(snippet))
+        |> assign(:form_layout, "balanced")
+        |> assign(:submit_label, "Save changes")
+        |> assign(:submit_disable_with, "Saving...")
+        |> assign(:cancel_href, ~p"/s/#{snippet.id}")
+        |> assign(:show_delete?, true)
+        |> assign(:delete_button_id, "delete-snippet-#{snippet.id}")
+        |> assign(:delete_event, "delete")
+        |> assign(
+          :delete_confirm,
+          "Are you sure you want to delete this snippet? This action cannot be undone."
+        )
+
+      {:ok, assign_form_state(socket, changeset, snippet)}
     else
       {:ok,
        socket
@@ -39,7 +59,9 @@ defmodule ReviewRoomWeb.SnippetLive.Edit do
       |> Snippet.update_changeset(snippet_params)
       |> Map.put(:action, :validate)
 
-    {:noreply, assign(socket, :form, to_form(changeset))}
+    preview = FormContext.preview_snippet(socket.assigns.snippet, snippet_params)
+
+    {:noreply, assign_form_state(socket, changeset, preview)}
   end
 
   @impl true
@@ -58,14 +80,17 @@ defmodule ReviewRoomWeb.SnippetLive.Edit do
         {:noreply,
          socket
          |> assign(:snippet, updated)
+         |> assign(:share_url, share_url_for(updated))
          |> put_flash(:info, "Snippet updated successfully")
          |> push_navigate(to: ~p"/s/#{updated.id}")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
+        preview = FormContext.preview_snippet(snippet, snippet_params)
+
         {:noreply,
          socket
          |> put_flash(:error, "Unable to update snippet. Please fix the highlighted issues.")
-         |> assign(:form, to_form(changeset))}
+         |> assign_form_state(changeset, preview)}
 
       {:error, :unauthorized} ->
         {:noreply,
@@ -73,6 +98,11 @@ defmodule ReviewRoomWeb.SnippetLive.Edit do
          |> put_flash(:error, "You do not have permission to edit this snippet.")
          |> push_navigate(to: ~p"/s/#{snippet.id}")}
     end
+  end
+
+  @impl true
+  def handle_event("dismiss_toast", _params, socket) do
+    {:noreply, clear_flash(socket, :info)}
   end
 
   @impl true
@@ -106,20 +136,37 @@ defmodule ReviewRoomWeb.SnippetLive.Edit do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
       <Components.snippet_form
-        title="Edit Snippet"
-        description="Update your code snippet details below. Changes will be reflected in real time for active viewers."
+        flash={@flash}
+        title={@hero_title}
+        description={@hero_description}
         form={@form}
         snippet={@snippet}
         id="snippet-edit-form"
-        cancel_href={~p"/s/#{@snippet.id}"}
-        submit_label="Save changes"
-        submit_disable_with="Saving..."
-        show_delete?={true}
-        delete_button_id={"delete-snippet-#{@snippet.id}"}
-        delete_event="delete"
-        delete_confirm="Are you sure you want to delete this snippet? This action cannot be undone."
+        layout={@form_layout}
+        share_label={@share_label}
+        share_url={@share_url}
+        guidance_panels={@guidance_panels}
+        safety_pulses={@safety_pulses}
+        cancel_href={@cancel_href}
+        submit_label={@submit_label}
+        submit_disable_with={@submit_disable_with}
+        show_delete?={@show_delete?}
+        delete_button_id={@delete_button_id}
+        delete_event={@delete_event}
+        delete_confirm={@delete_confirm}
       />
     </Layouts.app>
     """
   end
+
+  defp assign_form_state(socket, changeset, preview) do
+    socket
+    |> assign(:preview_snippet, preview)
+    |> assign(:guidance_panels, FormContext.guidance_panels(preview))
+    |> assign(:safety_pulses, FormContext.safety_pulses(preview))
+    |> assign(:form, to_form(changeset))
+  end
+
+  defp share_url_for(%Snippet{id: id}) when is_binary(id), do: url(~p"/s/#{id}")
+  defp share_url_for(_snippet), do: url(~p"/snippets/new?preview=1")
 end
