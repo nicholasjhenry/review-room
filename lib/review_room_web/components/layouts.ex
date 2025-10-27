@@ -5,6 +5,8 @@ defmodule ReviewRoomWeb.Layouts do
   """
   use ReviewRoomWeb, :html
 
+  alias ReviewRoomWeb.Components.DesignSystem.NavigationComponents
+
   # Embed all files in layouts/* within this module.
   # The default root.html.heex file contains the HTML
   # skeleton of your application, namely HTML headers
@@ -31,69 +33,33 @@ defmodule ReviewRoomWeb.Layouts do
     default: nil,
     doc: "the current [scope](https://hexdocs.pm/phoenix/scopes.html)"
 
+  attr :chrome, :map,
+    default: %{},
+    doc: "options for the new navigation chrome (e.g., active_item)"
+
   slot :inner_block, required: true
 
   def app(assigns) do
+    chrome = normalize_chrome(Map.get(assigns, :chrome))
+
+    assigns =
+      assigns
+      |> assign(:chrome, chrome)
+      |> assign_new(:current_scope, fn -> nil end)
+
     ~H"""
-    <header class="border-b border-slate-200 bg-white/80 backdrop-blur">
-      <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-        <div class="flex items-center gap-8">
-          <.link navigate={~p"/"} class="flex items-center gap-2 text-slate-900">
-            <img src={~p"/images/logo.svg"} width="36" alt="ReviewRoom logo" />
-            <span class="text-lg font-semibold">ReviewRoom</span>
-          </.link>
+    <NavigationComponents.primary_shell
+      current_scope={@current_scope}
+      active_item={Map.get(@chrome, :active_item, :discover)}
+    >
+      <:actions>
+        <.theme_toggle />
+      </:actions>
+    </NavigationComponents.primary_shell>
 
-          <nav class="hidden items-center gap-6 text-sm text-slate-600 md:flex">
-            <.link
-              navigate={~p"/snippets"}
-              class="transition hover:text-slate-900"
-            >
-              Discover
-            </.link>
-            <.link
-              navigate={~p"/snippets/new"}
-              class="transition hover:text-slate-900"
-            >
-              Share Snippet
-            </.link>
-            <.link
-              :if={@current_scope && @current_scope.user}
-              navigate={~p"/snippets/my"}
-              class="transition hover:text-slate-900"
-            >
-              My Snippets
-            </.link>
-          </nav>
-        </div>
-
-        <div class="flex items-center gap-3">
-          <.theme_toggle />
-
-          <.link
-            :if={!@current_scope || is_nil(@current_scope.user)}
-            navigate={~p"/users/log-in"}
-            class="hidden rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:text-slate-800 md:inline-flex"
-          >
-            Sign in
-          </.link>
-
-          <.link
-            :if={@current_scope && @current_scope.user}
-            navigate={~p"/users/log-out"}
-            method="delete"
-            class="hidden rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:text-slate-800 md:inline-flex"
-          >
-            Sign out
-          </.link>
-        </div>
-      </div>
-    </header>
-
-    <main class="bg-slate-50">
-      <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-        <div class="space-y-6">
-          {render_slot(@inner_block)}
-        </div>
+    <main class="app-main bg-slate-50">
+      <div class="mx-auto flex max-w-6xl flex-col gap-10 px-4 py-10 sm:px-6 lg:px-8">
+        {render_slot(@inner_block)}
       </div>
     </main>
 
@@ -180,4 +146,12 @@ defmodule ReviewRoomWeb.Layouts do
     </div>
     """
   end
+
+  defp normalize_chrome(nil), do: %{active_item: :discover}
+
+  defp normalize_chrome(chrome) when is_map(chrome) do
+    Map.put_new(chrome, :active_item, :discover)
+  end
+
+  defp normalize_chrome(_invalid), do: %{active_item: :discover}
 end

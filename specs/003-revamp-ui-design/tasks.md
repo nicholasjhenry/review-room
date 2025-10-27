@@ -76,12 +76,12 @@ Ensure navigation, secondary menus, and empty/loading states reflect cohesive vi
 
 ### Tasks
 
-- [ ] T023 [US3] Author failing LiveView tests for navigation active states and empty/loading views in test/review_room_web/live/snippet_show_live_test.exs
-- [ ] T024 [US3] Create navigation and chrome components in lib/review_room_web/components/design_system/navigation_components.ex
-- [ ] T025 [US3] Apply navigation updates to layout modules (lib/review_room_web/components/layout_components.ex)
-- [ ] T026 [US3] Update primary LiveView templates (snippet show, account, dashboard) to use new navigation components
-- [ ] T027 [US3] Add skeleton and empty state components styling to assets/css/design-system.css (chrome section)
-- [ ] T028 [US3] Update quickstart with navigation verification steps (append to specs/003-revamp-ui-design/quickstart.md)
+- [x] T023 [US3] Author failing LiveView tests for navigation active states and empty/loading views in test/review_room_web/live/snippet_show_live_test.exs
+- [x] T024 [US3] Create navigation and chrome components in lib/review_room_web/components/design_system/navigation_components.ex
+- [x] T025 [US3] Apply navigation updates to layout modules (lib/review_room_web/components/layout_components.ex)
+- [x] T026 [US3] Update primary LiveView templates (snippet show, account, dashboard) to use new navigation components
+- [x] T027 [US3] Add skeleton and empty state components styling to assets/css/design-system.css (chrome section)
+- [x] T028 [US3] Update quickstart with navigation verification steps (append to specs/003-revamp-ui-design/quickstart.md)
 
 ## Phase 6 – Polish & Cross-Cutting
 

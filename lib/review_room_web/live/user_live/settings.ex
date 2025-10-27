@@ -4,64 +4,106 @@ defmodule ReviewRoomWeb.UserLive.Settings do
   on_mount {ReviewRoomWeb.UserAuth, :require_sudo_mode}
 
   alias ReviewRoom.Accounts
+  alias ReviewRoomWeb.Components.DesignSystem.NavigationComponents, as: DSNavigation
 
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_scope}>
-      <div class="text-center">
-        <.header>
-          Account Settings
-          <:subtitle>Manage your account email address and password settings</:subtitle>
-        </.header>
-      </div>
-
-      <.form for={@email_form} id="email_form" phx-submit="update_email" phx-change="validate_email">
-        <.input
-          field={@email_form[:email]}
-          type="email"
-          label="Email"
-          autocomplete="username"
-          required
-        />
-        <.button variant="primary" phx-disable-with="Changing...">Change Email</.button>
-      </.form>
-
-      <div class="divider" />
-
-      <.form
-        for={@password_form}
-        id="password_form"
-        action={~p"/users/update-password"}
-        method="post"
-        phx-change="validate_password"
-        phx-submit="update_password"
-        phx-trigger-action={@trigger_submit}
+    <Layouts.app flash={@flash} current_scope={@current_scope} chrome={@chrome}>
+      <DSNavigation.page_header
+        id="account-header"
+        eyebrow="Account"
+        title="Account Settings"
+        subtitle="Manage your ReviewRoom credentials and keep collaborators in the loop."
+        breadcrumbs={[
+          %{label: "Workspace", href: ~p"/snippets/my"},
+          %{label: "Account", href: ~p"/users/settings", current?: true}
+        ]}
+        meta={[
+          %{icon: "hero-envelope", label: "Current email · #{@current_email}"}
+        ]}
       >
-        <input
-          name={@password_form[:email].name}
-          type="hidden"
-          id="hidden_user_email"
-          autocomplete="username"
-          value={@current_email}
-        />
-        <.input
-          field={@password_form[:password]}
-          type="password"
-          label="New password"
-          autocomplete="new-password"
-          required
-        />
-        <.input
-          field={@password_form[:password_confirmation]}
-          type="password"
-          label="Confirm new password"
-          autocomplete="new-password"
-        />
-        <.button variant="primary" phx-disable-with="Saving...">
-          Save Password
-        </.button>
-      </.form>
+        <:actions>
+          <.link
+            navigate={~p"/snippets/my"}
+            class="inline-flex items-center gap-2 rounded-full border border-white/35 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
+          >
+            <.icon name="hero-arrow-left-circle" class="h-4 w-4" /> Back to dashboard
+          </.link>
+        </:actions>
+      </DSNavigation.page_header>
+
+      <div class="settings-panels grid gap-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+        <section class="rounded-3xl border border-slate-200/70 bg-white/95 p-6 shadow-sm shadow-slate-200/50">
+          <h2 class="text-lg font-semibold text-slate-900">Update email</h2>
+          <p class="mt-2 text-sm text-slate-500">
+            Receive trusted notifications and collaborative invites at the right inbox.
+          </p>
+
+          <div class="mt-6">
+            <.form
+              for={@email_form}
+              id="email_form"
+              phx-submit="update_email"
+              phx-change="validate_email"
+              class="space-y-6"
+            >
+              <.input
+                field={@email_form[:email]}
+                type="email"
+                label="Email"
+                autocomplete="username"
+                required
+              />
+              <.button variant="primary" phx-disable-with="Changing...">Change Email</.button>
+            </.form>
+          </div>
+        </section>
+
+        <section class="rounded-3xl border border-slate-200/70 bg-white/95 p-6 shadow-sm shadow-slate-200/50">
+          <h2 class="text-lg font-semibold text-slate-900">Update password</h2>
+          <p class="mt-2 text-sm text-slate-500">
+            Refresh your password to keep your workspace protected with premium security cues.
+          </p>
+
+          <div class="mt-6">
+            <.form
+              for={@password_form}
+              id="password_form"
+              action={~p"/users/update-password"}
+              method="post"
+              phx-change="validate_password"
+              phx-submit="update_password"
+              phx-trigger-action={@trigger_submit}
+              class="space-y-6"
+            >
+              <input
+                name={@password_form[:email].name}
+                type="hidden"
+                id="hidden_user_email"
+                autocomplete="username"
+                value={@current_email}
+              />
+              <.input
+                field={@password_form[:password]}
+                type="password"
+                label="New password"
+                autocomplete="new-password"
+                required
+              />
+              <.input
+                field={@password_form[:password_confirmation]}
+                type="password"
+                label="Confirm new password"
+                autocomplete="new-password"
+              />
+              <.button variant="primary" phx-disable-with="Saving...">
+                Save Password
+              </.button>
+            </.form>
+          </div>
+        </section>
+      </div>
     </Layouts.app>
     """
   end
@@ -91,6 +133,7 @@ defmodule ReviewRoomWeb.UserLive.Settings do
       |> assign(:email_form, to_form(email_changeset))
       |> assign(:password_form, to_form(password_changeset))
       |> assign(:trigger_submit, false)
+      |> assign(:chrome, %{active_item: :account})
 
     {:ok, socket}
   end
