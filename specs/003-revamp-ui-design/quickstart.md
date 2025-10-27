@@ -34,6 +34,12 @@
    - Run tests to confirm color contrast tokens satisfy WCAG 2.1 AA (document ratios in tests or fixtures).
    - Validate reduced-motion preferences by toggling OS setting and confirming transitions disable gracefully.
 
-8. **Finalize**
+8. **Form Confidence Checklist**
+   - Execute `mix test test/review_room_web/live/snippet_form_live_test.exs` to ensure the hero, helper text, aria-describedby chaining, and toast hook assertions pass.
+   - Validate the LiveView manually: open `/snippets/new`, confirm `#snippet-form` references `aria-labelledby="snippet-form-hero-title"` and that `[data-role="field-helper"]` strings match the spec copy.
+   - Trigger a flash message (e.g., `put_flash(:info, "Snippet saved with new design system styles.")`) and observe `#snippet-form-toast`: the `FormFeedbackToast` hook should auto-dismiss after ~4.2s unless reduced motion is enabled. In reduced-motion mode the toast should stay steady (no translateY) while still clearing via button or hook.
+   - Verify clipboard interactions under `#snippet-share-toolbar`: success states surface emerald accents and errors use rose accents. Contrast ratios (text on backgrounds) stay ≥4.5:1 (e.g., `text-slate-900` on `bg-white` ≈ 12.6:1, `text-emerald-900` on `bg-emerald-50` ≈ 7.8:1).
+
+9. **Finalize**
    - Run `mix precommit` to enforce constitution gates.
    - Capture screenshots or LazyHTML snapshots demonstrating redesigned states for review.

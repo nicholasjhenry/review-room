@@ -32,6 +32,7 @@ import CursorTracker from "./hooks/cursor_tracker";
 import { PresenceRenderer } from "./hooks/presence_renderer";
 import ClipboardCopy from "./hooks/clipboard_copy";
 import FilterPanelToggle from "./hooks/filter_panel_toggle";
+import FormFeedbackToast from "./hooks/form_feedback_toast";
 
 // Make hljs globally available for LiveView hooks
 window.hljs = hljs;
@@ -39,6 +40,7 @@ window.hljs = hljs;
 const designSystemHooks = {
   ClipboardCopy,
   FilterPanelToggle,
+  FormFeedbackToast,
 };
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content");

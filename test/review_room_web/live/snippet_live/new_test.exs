@@ -13,7 +13,7 @@ defmodule ReviewRoomWeb.SnippetLive.NewTest do
     test "mount displays form", %{conn: conn} do
       {:ok, view, html} = live(conn, ~p"/snippets/new")
 
-      assert html =~ "New Snippet"
+      assert html =~ "Confident Snippet Management"
       assert has_element?(view, "form#snippet-form")
       assert has_element?(view, "textarea[name='snippet[code]']")
       assert has_element?(view, "input[name='snippet[title]']")
