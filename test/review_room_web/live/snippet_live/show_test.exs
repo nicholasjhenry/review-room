@@ -1,5 +1,8 @@
 defmodule ReviewRoomWeb.SnippetLive.ShowTest do
   use ReviewRoomWeb.ConnCase, async: true
+  use ReviewRoomWeb.DesignSystemCase
+
+  alias LazyHTML
 
   import Phoenix.LiveViewTest
   import ReviewRoom.SnippetsFixtures
@@ -149,6 +152,50 @@ defmodule ReviewRoomWeb.SnippetLive.ShowTest do
       [user_id] = Map.keys(presences)
       [meta] = presences[user_id].metas
       assert meta.cursor == %{line: 3, column: 7}
+    end
+  end
+
+  describe "Navigation chrome (Spec 003)" do
+    test "primary navigation marks workspace tab active", %{conn: conn} do
+      snippet = snippet_fixture(%{code: "IO.puts(:ok)", title: "Workspace Test"})
+
+      {:ok, view, _html} = live(conn, ~p"/s/#{snippet.id}")
+
+      assert has_element?(
+               view,
+               "#app-navigation [data-nav-item='workspace'][data-active='true'][aria-current='page']"
+             )
+    end
+
+    test "initial render surfaces workspace skeleton state", %{conn: conn} do
+      snippet = snippet_fixture(%{code: "IO.puts(:ok)", title: "Workspace Loading"})
+
+      {:ok, _view, disconnected_html} = live(conn, ~p"/s/#{snippet.id}")
+
+      assert disconnected_html =~ "id=\"workspace-shell\""
+
+      shell_fragment = lazy_select(disconnected_html, "#workspace-shell")
+      assert LazyHTML.attribute(shell_fragment, "data-state") == ["ready"]
+
+      skeleton_fragment = lazy_select(disconnected_html, "#workspace-skeleton")
+      assert LazyHTML.tag(skeleton_fragment) == []
+    end
+
+    test "empty activity timeline displays design system empty state", %{conn: conn} do
+      snippet = snippet_fixture(%{code: "IO.puts(:ok)", title: "Workspace Empty"})
+
+      {:ok, view, _html} = live(conn, ~p"/s/#{snippet.id}")
+
+      assert has_element?(
+               view,
+               "#workspace-activity-empty[data-role='empty-state'][data-context='timeline']"
+             )
+
+      assert has_element?(
+               view,
+               "#workspace-activity-empty [data-empty-title]",
+               "Timeline is warming up"
+             )
     end
   end
 

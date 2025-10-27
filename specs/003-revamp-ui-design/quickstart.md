@@ -43,3 +43,9 @@
 9. **Finalize**
    - Run `mix precommit` to enforce constitution gates.
    - Capture screenshots or LazyHTML snapshots demonstrating redesigned states for review.
+
+10. **Navigation Confidence Checklist**
+    - Load `/s/:id` and verify `#app-navigation` highlights the `workspace` item with `aria-current="page"`.
+    - Toggle reduced-motion preferences and confirm the workspace shell transitions respect `data-state` and `motion-safe` fallbacks.
+    - Collapse empty timeline states by inspecting `#workspace-activity-empty[data-role="empty-state"]` and ensure it only displays when no activity entries exist.
+    - Visit `/users/settings` and `/snippets/my` to confirm the new chrome renders the correct breadcrumbs, active nav state, and polished dashboard cards.

@@ -4,6 +4,7 @@ defmodule ReviewRoomWeb.SnippetLive.Show do
   alias ReviewRoom.Accounts.User
   alias ReviewRoom.Snippets
   alias ReviewRoom.Snippets.PresenceTracker
+  alias ReviewRoomWeb.Components.DesignSystem.NavigationComponents, as: DSNavigation
 
   @moduledoc """
   Displays an individual snippet with collaborative enhancements including syntax highlighting,
@@ -31,7 +32,11 @@ defmodule ReviewRoomWeb.SnippetLive.Show do
         viewer_meta: nil,
         last_cursor: nil,
         last_selection: nil,
-        last_cursor_update_at: nil
+        last_cursor_update_at: nil,
+        workspace_loading?: true,
+        workspace_state: "loading",
+        activity_entries: [],
+        chrome: %{active_item: :workspace}
       )
 
     socket =
@@ -65,6 +70,8 @@ defmodule ReviewRoomWeb.SnippetLive.Show do
         |> assign(presences: presences)
         |> assign(user_id: user_id)
         |> assign(viewer_meta: viewer_meta)
+        |> assign(:workspace_loading?, false)
+        |> assign(:workspace_state, "ready")
       else
         socket
       end
@@ -74,207 +81,275 @@ defmodule ReviewRoomWeb.SnippetLive.Show do
 
   @impl true
   def render(assigns) do
+    assigns =
+      assigns
+      |> assign(:header_meta, workspace_meta(assigns.snippet))
+      |> assign(:header_breadcrumbs, workspace_breadcrumbs(assigns.snippet))
+      |> assign(:header_subtitle, workspace_subtitle(assigns.snippet))
+      |> assign(:presence_entries, presence_entries(assigns.presences))
+      |> assign(:presence_count, map_size(assigns.presences))
+      |> assign(:activity_empty?, Enum.empty?(assigns.activity_entries || []))
+      |> assign(
+        :updated_label,
+        format_timestamp(assigns.snippet.updated_at || assigns.snippet.inserted_at)
+      )
+
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_scope}>
-      <div class="mx-auto max-w-6xl px-4 py-8">
-        <div class="mb-6">
-          <div class="flex items-center justify-between mb-2">
-            <h1 class="text-3xl font-bold">
-              {@snippet.title || "Code Snippet"}
-            </h1>
-            <div class="flex gap-2 text-sm text-gray-600">
-              <span :if={@snippet.language} class="px-2 py-1 bg-gray-100 rounded">
-                {@snippet.language}
-              </span>
-              <span class="px-2 py-1 bg-gray-100 rounded">
-                {if @snippet.visibility == :public, do: "Public", else: "Private"}
-              </span>
-            </div>
-          </div>
-
-          <p :if={@snippet.description} class="text-gray-600 mt-2">
-            {@snippet.description}
-          </p>
-        </div>
-
-        <div class="relative">
-          <div
-            id="cursor-tracker"
-            phx-hook="CursorTracker"
-            class="relative"
+    <Layouts.app flash={@flash} current_scope={@current_scope} chrome={@chrome}>
+      <DSNavigation.page_header
+        id="workspace-header"
+        eyebrow="Workspace"
+        title={@snippet.title || "Code Snippet"}
+        subtitle={@header_subtitle}
+        breadcrumbs={@header_breadcrumbs}
+        meta={@header_meta}
+      >
+        <:actions>
+          <.link
+            navigate={~p"/snippets"}
+            class="inline-flex items-center gap-2 rounded-full border border-white/35 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
           >
-            <%!-- Presence Overlay for cursor and selection rendering --%>
-            <div
-              id="presence-overlay"
-              phx-hook="PresenceRenderer"
-              data-presences={Jason.encode!(@presences)}
-              class="absolute inset-0 pointer-events-none z-10"
-            >
-            </div>
-
-            <div
-              :if={@connection_status == :reconnecting}
-              class="absolute inset-0 z-20 flex items-center justify-center bg-white/80 backdrop-blur-sm"
-              role="status"
-              aria-live="polite"
-            >
-              <div class="inline-flex items-center gap-3 rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow">
-                <.icon name="hero-arrow-path" class="h-4 w-4 animate-spin text-blue-500" />
-                <span>Reconnecting&hellip;</span>
-              </div>
-            </div>
-
-            <% lines = String.split(@snippet.code || "", "\n") %>
-            <div
-              id="code-display"
-              phx-hook="SyntaxHighlight"
-              phx-update="ignore"
-              class="relative z-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-950 shadow-sm"
-            >
-              <div class="flex text-[13px] leading-6 text-slate-100">
-                <div class="hidden select-none border-r border-slate-800/60 bg-slate-950/60 px-4 py-4 text-right font-mono text-[11px] uppercase tracking-wide text-slate-500 sm:block">
-                  <div
-                    :for={{_line, index} <- Enum.with_index(lines, 1)}
-                    data-role="line-number"
-                    class="tabular-nums"
-                  >
-                    {index}
-                  </div>
-                </div>
-                <div class="w-full overflow-auto">
-                  <pre
-                    phx-no-curly-interpolation
-                    class="min-h-[320px] bg-transparent px-4 py-4 font-mono text-sm text-slate-100"
-                  ><code class={[
-                    "block min-w-full whitespace-pre",
-                    language_class(@snippet.language)
-                  ]}><%= @snippet.code %></code></pre>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            phx-hook="ClipboardCopy"
-            data-clipboard-target="#snippet-code-content"
-            data-state="default"
-            id="snippet-copy-button"
-            class="absolute right-3 top-3 z-30 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-4 py-1.5 text-xs font-semibold text-slate-600 shadow transition hover:translate-y-[-1px] hover:border-blue-200 hover:text-blue-600"
-          >
-            <span data-default-state class="flex items-center gap-2">
-              <.icon name="hero-clipboard" class="h-3.5 w-3.5" /> Copy
-            </span>
-            <span data-success-state class="hidden items-center gap-2 text-emerald-600">
-              <.icon name="hero-check" class="h-3.5 w-3.5" /> Copied!
-            </span>
-            <span data-error-state class="hidden items-center gap-2 text-red-500">
-              <.icon name="hero-exclamation-triangle" class="h-3.5 w-3.5" /> Retry
-            </span>
-          </button>
-
-          <div id="snippet-code-content" class="sr-only" aria-hidden="true">{@snippet.code}</div>
-        </div>
-
-        <%!-- Polished Presence List --%>
-        <div id="presence-list" class="mt-6">
-          <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-            <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
-              <h3 class="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                <svg
-                  class="w-4 h-4 text-gray-500"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                  />
-                </svg>
-                <span>Active Viewers ({map_size(@presences)})</span>
-              </h3>
-            </div>
-            <ul class="divide-y divide-gray-200">
-              <%= if map_size(@presences) == 0 do %>
-                <li class="px-4 py-3 text-sm text-gray-500 italic">
-                  No active viewers
-                </li>
-              <% else %>
-                <%= for {_user_id, %{metas: metas}} <- @presences do %>
-                  <% [meta] = metas %>
-                  <li class="px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition-colors">
-                    <div
-                      class="w-3 h-3 rounded-full flex-shrink-0"
-                      style={"background-color: #{meta[:color] || "#6B7280"}"}
-                      title={"Viewer color: #{meta[:color] || "#6B7280"}"}
-                    >
-                    </div>
-                    <div class="flex-1 min-w-0">
-                      <p class="text-sm font-medium text-gray-900 truncate">
-                        {meta.display_name}
-                      </p>
-                      <div class="flex gap-3 text-xs text-gray-500 mt-1">
-                        <%= if meta[:cursor] do %>
-                          <span class="flex items-center gap-1">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
-                              />
-                            </svg>
-                            Line {meta.cursor.line}, Col {meta.cursor.column}
-                          </span>
-                        <% end %>
-                        <%= if meta[:selection] do %>
-                          <span class="flex items-center gap-1">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
-                              />
-                            </svg>
-                            Selected: L{meta.selection.start.line}:{meta.selection.start.column} → L{meta.selection.end.line}:{meta.selection.end.column}
-                          </span>
-                        <% end %>
-                      </div>
-                    </div>
-                  </li>
-                <% end %>
-              <% end %>
-            </ul>
-          </div>
-        </div>
-
-        <div class="mt-6 flex gap-4 items-center flex-wrap">
-          <.link navigate={~p"/snippets/new"} class="text-blue-600 hover:text-blue-800">
-            Create New Snippet
+            <.icon name="hero-arrow-uturn-left" class="h-4 w-4" /> Back to gallery
           </.link>
           <.link
             :if={@can_edit?}
             navigate={~p"/s/#{@snippet.id}/edit"}
-            class="text-gray-600 hover:text-gray-800"
+            class="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow transition hover:shadow-lg"
           >
-            Edit Snippet
+            <.icon name="hero-pencil-square" class="h-4 w-4" /> Edit snippet
           </.link>
-          <.link
-            :if={@current_scope && @current_scope.user}
-            navigate={~p"/snippets/my"}
-            class="text-gray-600 hover:text-gray-800"
+        </:actions>
+      </DSNavigation.page_header>
+
+      <section
+        id="workspace-shell"
+        data-state={@workspace_state}
+        class="workspace-shell space-y-8"
+      >
+        <%= if @workspace_loading? do %>
+          <DSNavigation.workspace_skeleton />
+        <% else %>
+          <div
+            id="workspace-content"
+            class="workspace-grid grid gap-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]"
           >
-            My Snippets
-          </.link>
-          <.link navigate={~p"/"} class="text-gray-600 hover:text-gray-800">
-            Home
-          </.link>
-        </div>
-      </div>
+            <div class="workspace-main rounded-3xl border border-slate-200/70 bg-white/95 p-6 shadow-sm shadow-slate-200/50 lg:p-7">
+              <div class="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                <span class="inline-flex items-center gap-2 rounded-full bg-slate-900/5 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-slate-600">
+                  <.icon name="hero-command-line" class="h-3.5 w-3.5" />
+                  {language_label(@snippet.language)}
+                </span>
+                <span class={[
+                  "inline-flex items-center gap-2 rounded-full px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.35em]",
+                  visibility_class(@snippet.visibility)
+                ]}>
+                  <.icon name="hero-eye" class="h-3.5 w-3.5" />
+                  {visibility_label(@snippet.visibility)}
+                </span>
+                <span class="inline-flex items-center gap-2 rounded-full bg-slate-900/5 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-slate-600">
+                  <.icon name="hero-clock" class="h-3.5 w-3.5" /> Updated {@updated_label}
+                </span>
+              </div>
+
+              <p
+                :if={@snippet.description}
+                class="mt-5 text-base leading-relaxed text-slate-600"
+              >
+                {@snippet.description}
+              </p>
+
+              <p class="mt-3 text-sm text-slate-500">
+                {default_workspace_tagline()}
+              </p>
+
+              <div class="relative mt-6">
+                <div
+                  id="cursor-tracker"
+                  phx-hook="CursorTracker"
+                  class="relative"
+                >
+                  <div
+                    id="presence-overlay"
+                    phx-hook="PresenceRenderer"
+                    data-presences={Jason.encode!(@presences)}
+                    class="absolute inset-0 pointer-events-none z-20"
+                  >
+                  </div>
+
+                  <div
+                    :if={@connection_status == :reconnecting}
+                    class="absolute inset-0 z-30 flex items-center justify-center bg-white/85 backdrop-blur-sm"
+                    role="status"
+                    aria-live="polite"
+                  >
+                    <div class="inline-flex items-center gap-3 rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow">
+                      <.icon name="hero-arrow-path" class="h-4 w-4 animate-spin text-blue-500" />
+                      <span>Reconnecting&hellip;</span>
+                    </div>
+                  </div>
+
+                  <% lines = String.split(@snippet.code || "", "\n") %>
+                  <div
+                    id="code-display"
+                    phx-hook="SyntaxHighlight"
+                    phx-update="ignore"
+                    class="overflow-hidden rounded-2xl border border-slate-200/60 bg-slate-950 shadow-sm"
+                  >
+                    <div class="flex text-[13px] leading-6 text-slate-100">
+                      <div class="hidden select-none border-r border-slate-800/60 bg-slate-950/60 px-4 py-4 text-right font-mono text-[11px] uppercase tracking-wide text-slate-500 sm:block">
+                        <div
+                          :for={{_line, index} <- Enum.with_index(lines, 1)}
+                          data-role="line-number"
+                          class="tabular-nums"
+                        >
+                          {index}
+                        </div>
+                      </div>
+                      <div class="w-full overflow-auto">
+                        <pre
+                          phx-no-curly-interpolation
+                          class="min-h-[320px] bg-transparent px-4 py-4 font-mono text-sm text-slate-100"
+                        ><code class={[
+                          "block min-w-full whitespace-pre",
+                          language_class(@snippet.language)
+                        ]}><%= @snippet.code %></code></pre>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  phx-hook="ClipboardCopy"
+                  data-clipboard-target="#snippet-code-content"
+                  data-state="default"
+                  id="snippet-copy-button"
+                  class="absolute right-4 top-4 z-40 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/95 px-4 py-1.5 text-xs font-semibold text-slate-600 shadow transition duration-150 hover:-translate-y-0.5 hover:border-blue-200 hover:text-blue-600"
+                >
+                  <span data-default-state class="flex items-center gap-2">
+                    <.icon name="hero-clipboard" class="h-3.5 w-3.5" /> Copy
+                  </span>
+                  <span data-success-state class="hidden items-center gap-2 text-emerald-600">
+                    <.icon name="hero-check" class="h-3.5 w-3.5" /> Copied!
+                  </span>
+                  <span data-error-state class="hidden items-center gap-2 text-red-500">
+                    <.icon name="hero-exclamation-triangle" class="h-3.5 w-3.5" /> Retry
+                  </span>
+                </button>
+
+                <div id="snippet-code-content" class="sr-only" aria-hidden="true">
+                  {@snippet.code}
+                </div>
+              </div>
+
+              <div class="mt-8 flex flex-wrap items-center gap-3 text-sm font-semibold text-slate-600">
+                <.link
+                  navigate={~p"/snippets/new"}
+                  class="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-1.5 transition hover:border-slate-300 hover:text-slate-900"
+                >
+                  <.icon name="hero-sparkles" class="h-4 w-4" /> Create new snippet
+                </.link>
+                <.link
+                  :if={@can_edit?}
+                  navigate={~p"/s/#{@snippet.id}/edit"}
+                  class="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-1.5 transition hover:border-slate-300 hover:text-slate-900"
+                >
+                  <.icon name="hero-adjustments-horizontal" class="h-4 w-4" /> Refine design
+                </.link>
+                <.link
+                  :if={@current_scope && @current_scope.user}
+                  navigate={~p"/snippets/my"}
+                  class="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-1.5 transition hover:border-slate-300 hover:text-slate-900"
+                >
+                  <.icon name="hero-folder" class="h-4 w-4" /> My dashboard
+                </.link>
+              </div>
+            </div>
+
+            <aside class="workspace-rail space-y-6">
+              <section
+                class="rounded-3xl border border-slate-200/70 bg-white/95 p-6 shadow-sm shadow-slate-200/50"
+                id="workspace-activity"
+              >
+                <header class="flex items-center justify-between gap-3">
+                  <div>
+                    <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400">
+                      Activity
+                    </p>
+                    <h2 class="mt-1 text-lg font-semibold text-slate-900">
+                      Timeline highlights
+                    </h2>
+                  </div>
+                </header>
+
+                <DSNavigation.empty_state
+                  :if={@activity_empty?}
+                  id="workspace-activity-empty"
+                  context="timeline"
+                  icon="hero-sparkles"
+                  title="Timeline is warming up"
+                  message="Updates land here once collaborators edit, share, or adjust visibility."
+                  class="mt-6"
+                />
+              </section>
+
+              <section class="rounded-3xl border border-slate-200/70 bg-white/95 p-6 shadow-sm shadow-slate-200/50">
+                <header class="flex items-center justify-between gap-3">
+                  <div>
+                    <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400">
+                      Collaborators
+                    </p>
+                    <h2 class="mt-1 text-lg font-semibold text-slate-900">
+                      Active Viewers ({@presence_count})
+                    </h2>
+                  </div>
+                </header>
+
+                <div
+                  id="presence-list"
+                  class="mt-4 divide-y divide-slate-200 text-sm text-slate-600"
+                >
+                  <p
+                    :if={@presence_entries == []}
+                    class="py-4 text-center italic text-slate-400"
+                  >
+                    No active viewers
+                  </p>
+
+                  <div
+                    :for={{user_id, meta} <- @presence_entries}
+                    id={"presence-#{user_id}"}
+                    class="flex items-center gap-4 py-4"
+                  >
+                    <div
+                      class="h-3.5 w-3.5 rounded-full"
+                      style={"background-color: #{meta[:color] || "#6B7280"}"}
+                      title={"Viewer color: #{meta[:color] || "#6B7280"}"}
+                    >
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <p class="truncate font-semibold text-slate-900">
+                        {meta.display_name}
+                      </p>
+                      <div class="mt-1 flex flex-wrap gap-3 text-xs text-slate-500">
+                        <span :if={meta[:cursor]} class="inline-flex items-center gap-1">
+                          <.icon name="hero-cursor-arrow-rays" class="h-3 w-3" />
+                          Line {meta.cursor.line}, Col {meta.cursor.column}
+                        </span>
+                        <span :if={meta[:selection]} class="inline-flex items-center gap-1">
+                          <.icon name="hero-document-text" class="h-3 w-3" />
+                          L{meta.selection.start.line}:{meta.selection.start.column} →
+                          L{meta.selection.end.line}:{meta.selection.end.column}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </aside>
+          </div>
+        <% end %>
+      </section>
     </Layouts.app>
     """
   end
@@ -398,6 +473,99 @@ defmodule ReviewRoomWeb.SnippetLive.Show do
     else
       {:noreply, socket}
     end
+  end
+
+  defp workspace_subtitle(%{description: desc}) when is_binary(desc) and desc != "", do: desc
+  defp workspace_subtitle(_), do: default_workspace_tagline()
+
+  defp default_workspace_tagline do
+    "Collaborate in real-time with presence-aware editing, clipboard polish, and stream-friendly updates tuned for Spec 003."
+  end
+
+  defp workspace_meta(snippet) do
+    [
+      visibility_meta(snippet.visibility),
+      language_meta(snippet.language),
+      updated_meta(snippet.updated_at || snippet.inserted_at)
+    ]
+    |> Enum.reject(&is_nil/1)
+  end
+
+  defp visibility_meta(nil), do: nil
+
+  defp visibility_meta(visibility) do
+    %{icon: "hero-eye", label: "Visibility · #{visibility_label(visibility)}"}
+  end
+
+  defp language_meta(nil), do: %{icon: "hero-command-line", label: "Language · AUTO"}
+
+  defp language_meta(language) do
+    %{icon: "hero-command-line", label: "Language · #{language_label(language)}"}
+  end
+
+  defp updated_meta(nil), do: nil
+
+  defp updated_meta(datetime),
+    do: %{icon: "hero-clock", label: "Updated #{format_timestamp(datetime)}"}
+
+  defp workspace_breadcrumbs(snippet) do
+    [
+      %{label: "Discover", href: ~p"/snippets"},
+      %{label: "Workspace", href: ~p"/snippets/my"},
+      %{label: snippet.title || "Code Snippet", href: ~p"/s/#{snippet.id}", current?: true}
+    ]
+  end
+
+  defp presence_entries(presences) do
+    presences
+    |> Enum.map(fn
+      {user_id, %{metas: [meta | _]}} -> {user_id, meta}
+      {user_id, %{metas: []}} -> {user_id, %{}}
+    end)
+    |> Enum.sort_by(fn {_id, meta} ->
+      meta
+      |> Map.get(:display_name, "")
+      |> String.downcase()
+    end)
+  end
+
+  defp visibility_label(:public), do: "Public"
+  defp visibility_label(:private), do: "Private"
+  defp visibility_label(:unlisted), do: "Unlisted"
+
+  defp visibility_label(value) when is_binary(value) do
+    value
+    |> String.replace("_", " ")
+    |> String.split()
+    |> Enum.map(&String.capitalize/1)
+    |> Enum.join(" ")
+  end
+
+  defp visibility_label(value) when is_atom(value), do: visibility_label(Atom.to_string(value))
+  defp visibility_label(_), do: "Private"
+
+  defp visibility_class(:public), do: "bg-emerald-50 text-emerald-700"
+  defp visibility_class(:private), do: "bg-slate-100 text-slate-600"
+  defp visibility_class(:unlisted), do: "bg-amber-50 text-amber-700"
+  defp visibility_class(_), do: "bg-slate-100 text-slate-600"
+
+  defp language_label(nil), do: "AUTO"
+
+  defp language_label(language) when is_binary(language) do
+    language
+    |> String.trim()
+    |> String.upcase()
+  end
+
+  defp language_label(language) when is_atom(language),
+    do: language |> Atom.to_string() |> language_label()
+
+  defp language_label(_), do: "AUTO"
+
+  defp format_timestamp(nil), do: "moments ago"
+
+  defp format_timestamp(%DateTime{} = datetime) do
+    Calendar.strftime(datetime, "%b %-d, %Y %H:%M")
   end
 
   defp rate_limited?(socket) do
