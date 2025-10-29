@@ -11,7 +11,10 @@ defmodule ReviewRoom.MixProject do
       aliases: aliases(),
       deps: deps(),
       compilers: [:phoenix_live_view] ++ Mix.compilers(),
-      listeners: [Phoenix.CodeReloader]
+      listeners: [Phoenix.CodeReloader],
+      dialyzer: [
+          plt_file: {:no_warn, "priv/plts/project.plt"}
+        ]
     ]
   end
 
@@ -68,7 +71,8 @@ defmodule ReviewRoom.MixProject do
       {:dns_cluster, "~> 0.2.0"},
       {:bandit, "~> 1.5"},
       {:igniter, "~> 0.6", only: [:dev, :test]},
-      {:tidewave, "~> 0.1", only: [:dev]}
+      {:tidewave, "~> 0.1", only: [:dev]},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}
     ]
   end
 
