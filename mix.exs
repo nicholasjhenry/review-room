@@ -40,6 +40,7 @@ defmodule ReviewRoom.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:usage_rules, "~> 0.1", only: [:dev]},
       {:phoenix, "~> 1.8.1"},
       {:phoenix_ecto, "~> 4.5"},
       {:ecto_sql, "~> 3.13"},
@@ -66,6 +67,7 @@ defmodule ReviewRoom.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.2.0"},
       {:bandit, "~> 1.5"},
+      {:igniter, "~> 0.6", only: [:dev, :test]},
       {:tidewave, "~> 0.1", only: [:dev]}
     ]
   end
@@ -89,7 +91,11 @@ defmodule ReviewRoom.MixProject do
         "esbuild review_room --minify",
         "phx.digest"
       ],
-      precommit: ["compile --warning-as-errors", "deps.unlock --unused", "format", "test"]
+      precommit: ["compile --warning-as-errors", "deps.unlock --unused", "format", "test"],
+      "usage_rules.update": [
+        # --all - Gather usage rules from all dependencies that have them (includes both main rules and all sub-rules)
+        "usage_rules.sync ./AGENTS.md --all --inline usage_rules:all --link-to-folder deps"
+      ]
     ]
   end
 end
