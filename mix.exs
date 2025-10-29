@@ -43,6 +43,7 @@ defmodule ReviewRoom.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:bcrypt_elixir, "~> 3.0"},
       {:usage_rules, "~> 0.1", only: [:dev]},
       {:phoenix, "~> 1.8.1"},
       {:phoenix_ecto, "~> 4.5"},
