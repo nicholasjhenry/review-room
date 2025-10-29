@@ -1,4 +1,17 @@
-[Project Guidelines](usage-rules/project.md)
+**IMPORTANT**:  STOP AND READ THESE PROJECT-SPECIFIC FILES FIRST
+
+Before you do ANYTHING in this project, read these files:
+
+1. usage-rules/project.md
+   - Project-specific guidelines and requirements
+   - Preferred libraries and tools
+
+2. usage-rules/workflow.md
+   - Defines the `web` CLI tool (your primary tool for browsing/testing)
+   - Explains shared session behavior
+   - Shows how to interact with the application
+
+Only after reading these should you proceed with any tasks.
 
 <!-- usage-rules-start -->
 <!-- usage-rules-header -->
@@ -40,7 +53,7 @@ mix usage_rules.docs Enum.zip/1
 
 ## Searching Documentation
 
-You should also consult the documentation of any tools you are using, early and often. The best 
+You should also consult the documentation of any tools you are using, early and often. The best
 way to accomplish this is to use the `usage_rules.search_docs` mix task. Once you have
 found what you are looking for, use the links in the search results to get more detail. For example:
 
