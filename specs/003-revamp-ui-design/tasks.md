@@ -85,9 +85,9 @@ Ensure navigation, secondary menus, and empty/loading states reflect cohesive vi
 
 ## Phase 6 – Polish & Cross-Cutting
 
-- [ ] T029 Perform accessibility regression sweep using existing helpers across gallery, form, navigation LiveViews
-- [ ] T030 Run mix precommit and capture test artifacts/screenshots for review
-- [ ] T031 Update documentation references (README snippets section, design notes) with highlights of redesign
+- [x] T029 Perform accessibility regression sweep using existing helpers across gallery, form, navigation LiveViews
+- [x] T030 Run mix precommit and capture test artifacts/screenshots for review (see VISUAL_ARTIFACTS.md)
+- [x] T031 Update documentation references (README snippets section, design notes) with highlights of redesign
 
 ## Dependencies
 
