@@ -13,8 +13,8 @@ defmodule ReviewRoom.MixProject do
       compilers: [:phoenix_live_view] ++ Mix.compilers(),
       listeners: [Phoenix.CodeReloader],
       dialyzer: [
-          plt_file: {:no_warn, "priv/plts/project.plt"}
-        ]
+        plt_file: {:no_warn, "priv/plts/project.plt"}
+      ]
     ]
   end
 
@@ -95,7 +95,13 @@ defmodule ReviewRoom.MixProject do
         "esbuild review_room --minify",
         "phx.digest"
       ],
-      precommit: ["compile --warning-as-errors", "deps.unlock --unused", "format", "test"],
+      precommit: [
+        "compile --warning-as-errors",
+        "dialyzer",
+        "deps.unlock --unused",
+        "format",
+        "test"
+      ],
       "usage_rules.update": [
         # --all - Gather usage rules from all dependencies that have them (includes both main rules and all sub-rules)
         "usage_rules.sync ./AGENTS.md --all --inline usage_rules:all --link-to-folder deps"
