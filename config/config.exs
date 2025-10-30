@@ -24,6 +24,21 @@ config :review_room,
   ecto_repos: [ReviewRoom.Repo],
   generators: [timestamp_type: :utc_datetime, binary_id: true]
 
+config :review_room, ReviewRoom.Snippets,
+  buffer: [
+    flush_count: 10,
+    flush_idle_ms: 5_000,
+    max_attempts: 3
+  ],
+  tag_catalog: [
+    %{label: "Elixir", value: "elixir", color: "indigo"},
+    %{label: "Phoenix", value: "phoenix", color: "orange"},
+    %{label: "LiveView", value: "liveview", color: "purple"},
+    %{label: "Ecto", value: "ecto", color: "teal"},
+    %{label: "Testing", value: "testing", color: "emerald"},
+    %{label: "Tooling", value: "tooling", color: "sky"}
+  ]
+
 # Configures the endpoint
 config :review_room, ReviewRoomWeb.Endpoint,
   url: [host: "localhost"],

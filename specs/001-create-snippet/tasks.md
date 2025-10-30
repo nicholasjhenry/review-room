@@ -26,9 +26,9 @@ description: "Task list template for feature implementation"
 
 **Purpose**: Prepare configuration, supervision, and fixtures required for all snippet work.
 
-- [ ] T001 Update config/config.exs to define snippet tag catalog entries and buffer thresholds for snippet batching.
-- [ ] T002 [P] Register ReviewRoom.Snippets.Buffer as a supervised child in lib/review_room/application.ex.
-- [ ] T003 [P] Create snippet fixture helpers for authenticated scopes in test/support/fixtures/snippets_fixtures.ex.
+- [x] T001 Update config/config.exs to define snippet tag catalog entries and buffer thresholds for snippet batching.
+- [x] T002 [P] Register ReviewRoom.Snippets.Buffer as a supervised child in lib/review_room/application.ex.
+- [x] T003 [P] Create snippet fixture helpers for authenticated scopes in test/support/fixtures/snippets_fixtures.ex.
 
 ---
 
@@ -38,11 +38,11 @@ description: "Task list template for feature implementation"
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T004 Create the snippets table migration with required columns, indexes, and visibility constraint in priv/repo/migrations/*_create_snippets.exs.
-- [ ] T005 Define ReviewRoom.Snippets.Snippet schema with typedoc/typespec and base fields in lib/review_room/snippets/snippet.ex.
-- [ ] T006 Author buffer behaviour tests for enqueue, flush triggers, and retry caps in test/review_room/snippets/buffer_test.exs.
-- [ ] T007 Implement ReviewRoom.Snippets.Buffer GenServer with size/time flush triggers, retries, and telemetry in lib/review_room/snippets/buffer.ex.
-- [ ] T008 Wire Accounts.Scope-aware enqueue/flush API surface for callers in lib/review_room/snippets.ex.
+- [x] T004 Create the snippets table migration with required columns, indexes, and visibility constraint in priv/repo/migrations/*_create_snippets.exs.
+- [x] T005 Define ReviewRoom.Snippets.Snippet schema with typedoc/typespec and base fields in lib/review_room/snippets/snippet.ex.
+- [x] T006 Author buffer behaviour tests for enqueue, flush triggers, and retry caps in test/review_room/snippets/buffer_test.exs.
+- [x] T007 Implement ReviewRoom.Snippets.Buffer GenServer with size/time flush triggers, retries, and telemetry in lib/review_room/snippets/buffer.ex.
+- [x] T008 Wire Accounts.Scope-aware enqueue/flush API surface for callers in lib/review_room/snippets.ex.
 
 ---
 
@@ -53,15 +53,15 @@ description: "Task list template for feature implementation"
 
 ### Tests for User Story 1 (MANDATORY - write these first) ⚠️
 
-- [ ] T009 [P] [US1] Add context tests covering required field validation and buffer enqueue failures in test/review_room/snippets/snippets_test.exs.
-- [ ] T010 [P] [US1] Add LiveView tests for happy-path submission and inline error messaging in test/review_room_web/live/snippet_live_new_test.exs.
+- [x] T009 [P] [US1] Add context tests covering required field validation and buffer enqueue failures in test/review_room/snippets/snippets_test.exs.
+- [x] T010 [P] [US1] Add LiveView tests for happy-path submission and inline error messaging in test/review_room_web/live/snippet_live_new_test.exs.
 
 ### Implementation for User Story 1
 
-- [ ] T011 [US1] Implement required field validations and length guards in lib/review_room/snippets/snippet.ex.
-- [ ] T012 [US1] Implement change_snippet/2 and enqueue/2 functions that accept Accounts.Scope and return buffer metadata in lib/review_room/snippets.ex.
-- [ ] T013 [US1] Build ReviewRoomWeb.SnippetLive.New LiveView with validate/save handlers, buffer feedback assigns, and form markup in lib/review_room_web/live/snippet_live/new.ex.
-- [ ] T014 [US1] Register the authenticated snippet creation route inside the :browser + :require_authenticated_user pipeline and live_session :require_authenticated_user in lib/review_room_web/router.ex to enforce login.
+- [x] T011 [US1] Implement required field validations and length guards in lib/review_room/snippets/snippet.ex.
+- [x] T012 [US1] Implement change_snippet/2 and enqueue/2 functions that accept Accounts.Scope and return buffer metadata in lib/review_room/snippets.ex.
+- [x] T013 [US1] Build ReviewRoomWeb.SnippetLive.New LiveView with validate/save handlers, buffer feedback assigns, and form markup in lib/review_room_web/live/snippet_live/new.ex.
+- [x] T014 [US1] Register the authenticated snippet creation route inside the :browser + :require_authenticated_user pipeline and live_session :require_authenticated_user in lib/review_room_web/router.ex to enforce login.
 
 **Checkpoint**: User Story 1 complete delivers the MVP flow with buffered persistence feedback for authenticated developers.
 
