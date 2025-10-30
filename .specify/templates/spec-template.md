@@ -95,10 +95,29 @@
 - **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
 - **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
 
+### Explicit Dependencies & Configuration *(mandatory)*
+
+- **Dependency**: [Name] - Purpose, configuration source, validation strategy, and the tests that will fail without it.
+- **Configuration**: [Name] - Default, validation behaviour, and how failures surface (timeouts, retries, circuit breakers).
+
 ### Key Entities *(include if feature involves data)*
 
 - **[Entity 1]**: [What it represents, key attributes without implementation]
 - **[Entity 2]**: [What it represents, relationships to other entities]
+
+## Test Plan *(mandatory before implementation)*
+
+### Unit Tests *(write these first)*
+
+- [List the failing unit tests that will be authored before implementation]
+
+### Integration Tests *(required for each cross-boundary interaction)*
+
+- [List integration tests, including external services, database interactions, LiveView flows, etc.]
+
+## Failure Modes & Observability *(mandatory)*
+
+- [Describe expected failure scenarios, logging, trace context, alerting rules, and how timeouts or circuit breakers will be verified]
 
 ## Success Criteria *(mandatory)*
 

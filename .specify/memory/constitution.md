@@ -1,50 +1,66 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report
+Version change: N/A -> 1.0.0
+Modified principles: Initial set defined (Test-First Development, Explicit Over Implicit, Fail Fast, Fail Loud)
+Added sections: Core Principles, Engineering Standards, Delivery Workflow & Tooling, Governance
+Removed sections: Placeholder principle slots (IV, V)
+Templates requiring updates:
+- ✅ .specify/templates/plan-template.md
+- ✅ .specify/templates/spec-template.md
+- ✅ .specify/templates/tasks-template.md
+Follow-up TODOs: None
+-->
+
+# ReviewRoom Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### Test-First Development (NON-NEGOTIABLE)
+- Write failing automated tests and secure reviewer approval before implementing production code or refactors.
+- Follow strict Red-Green-Refactor cycles; commit only the minimal code required to turn the suite green before refactoring.
+- Provide integration tests for every cross-boundary pathway (database, external services, LiveView <-> context, background jobs).
+- Block merges when required tests are missing or do not fail prior to implementation.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+**Rationale**: Disciplined TDD prevents regressions, documents behaviour, and keeps the team aligned on intended outcomes before investing in implementation.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### Explicit Over Implicit
+- Name modules, functions, and assigns to reveal intent; avoid convention-based magic or hidden side effects.
+- Declare every dependency and contract through function signatures or explicit data structures; never rely on global state or the process dictionary.
+- Validate configuration at boot with actionable error messages and document all settings in specs, plans, and README updates.
+- Record dependency introductions and migrations in feature documents so reviewers can audit the blast radius.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+**Rationale**: Explicit contracts make the system predictable, auditable, and safer to evolve under heavy review workloads.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### Fail Fast, Fail Loud
+- Validate inputs at controllers, LiveViews, and contexts; refuse to proceed when data is invalid or stale.
+- Instrument failure paths with structured logging and correlation or trace identifiers for each request or task.
+- Wrap external calls in timeouts, retries, and circuit breakers so incidents surface immediately to operators.
+- Codify failure expectations in automated tests, covering both success and error scenarios.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+**Rationale**: Loud failures protect users from silent data loss, reduce mean time to recovery, and create confidence in continuous delivery.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+## Engineering Standards
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+- Follow Phoenix phx.gen.auth routing guidance: place routes inside the correct pipeline and live_session, and explain scope choices in every review.
+- Use Accounts.Scope for authorization and pass current_scope to context functions; templates must access @current_scope.user exclusively.
+- Prefer the bundled Req client for HTTP calls; adding alternatives requires explicit approval and configuration documentation.
+- Provide typespecs and typedocs for every public context module and Ecto schema using the mandated template that enumerates fields and associations.
+- Extend priv/repo/seeds.exs (or dedicated seed modules) with representative demo data for each feature to enable manual verification.
+- Run mix precommit prior to requesting review to guarantee formatting, credo, tests, dialyzer, and other linters pass locally.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+## Delivery Workflow & Tooling
+
+- Feature specs, plans, and task lists must enumerate the failing tests to be authored first, including unit and integration coverage.
+- Researchers must consult `mix usage_rules.docs` and update documentation links before committing to an approach.
+- Exercise new functionality through the shared `web` CLI profiles to capture end-to-end behaviour and document findings.
+- Keep configuration, dependency, and data migration steps explicit in planning documents so no implicit work lands in implementation.
+- Sync demo data, documentation, and test fixtures for every release to preserve reproducibility.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+- Amendments require a written proposal, maintainer approval, and synchronized updates to all dependent templates before merging.
+- Versioning follows semantic rules: MAJOR for principle removals or incompatible governance, MINOR for new principles or material expansions, PATCH for clarifications.
+- Compliance is reviewed in every pull request; merges are blocked until the Constitution Check passes and mandated tests exist and fail prior to implementation.
+- Track ratification and amendment metadata in this document and reference the governing version in commit messages when altering process.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2025-10-30 | **Last Amended**: 2025-10-30

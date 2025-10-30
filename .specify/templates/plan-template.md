@@ -31,7 +31,11 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- [ ] Tests-first plan documented: list the failing unit and integration tests that will be authored before any implementation.
+- [ ] Cross-boundary interactions enumerated with required integration tests and supporting data setup.
+- [ ] Dependencies, configuration changes, and feature contracts documented explicitly; no hidden coupling.
+- [ ] Failure handling strategy captured for each external dependency (timeouts, retries, structured logging).
+- [ ] Demo data additions planned for priv/repo/seeds.exs so manual verification remains possible.
 
 ## Project Structure
 
