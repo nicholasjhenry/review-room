@@ -2,16 +2,23 @@
 
 Before you do ANYTHING in this project, read these files:
 
-1. usage-rules/project.md
+1. `usage-rules/project.md`
    - Project-specific guidelines and requirements
    - Preferred libraries and tools
 
-2. usage-rules/workflow.md
+2. `usage-rules/workflow.md`
    - Defines the `web` CLI tool (your primary tool for browsing/testing)
    - Explains shared session behavior
    - Shows how to interact with the application
 
 Only after reading these should you proceed with any tasks.
+
+## Task Files
+
+Before performing the tasks listed below, you **MUST** read the associated file and follow those standards exactly.
+
+- **Before writing or modifying Elixir tests**: `usage-rules/testing.md`
+- **Before writing or modifying TypeSpecs (including fixing Dialyzer errors)**: `usage-rules/typespecs.md`
 
 <!-- phoenix-gen-auth-start -->
 ## Authentication
