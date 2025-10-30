@@ -5,8 +5,8 @@ defmodule ReviewRoom.SnippetsTest do
 
   alias ReviewRoom.Snippets
 
-  describe "change_snippet/2" do
-    test "requires title, description, body, syntax, and visibility" do
+  describe "when validating snippet input" do
+    test "given blank attributes then required field errors surface" do
       scope = scope_fixture()
 
       changeset = Snippets.change_snippet(scope, %{})
@@ -19,13 +19,13 @@ defmodule ReviewRoom.SnippetsTest do
       assert "can't be blank" in errors_on(changeset).visibility
     end
 
-    test "produces valid changeset for well-formed attributes" do
+    test "given valid attributes then changeset is marked valid" do
       scope = scope_fixture()
 
       assert Snippets.change_snippet(scope, valid_snippet_attrs()).valid?
     end
 
-    test "respects length caps for title, description, and body" do
+    test "given oversized fields then length errors are returned" do
       scope = scope_fixture()
 
       attrs =
@@ -42,8 +42,8 @@ defmodule ReviewRoom.SnippetsTest do
     end
   end
 
-  describe "enqueue/2" do
-    test "returns error when buffer rejects payload" do
+  describe "when enqueueing a snippet" do
+    test "given buffer failure then error tuple bubbles up" do
       scope = scope_fixture()
 
       swap_buffer(__MODULE__.FailureBuffer, fn ->

@@ -7,8 +7,8 @@ defmodule ReviewRoomWeb.SnippetLive.NewTest do
   setup [:register_and_log_in_user]
   setup :stub_buffer
 
-  describe "new snippet form" do
-    test "queues snippet and shows confirmation", %{conn: conn} do
+  describe "when submitting a snippet" do
+    test "given valid form input then confirmation is shown", %{conn: conn} do
       {:ok, lv, _html} = live(conn, ~p"/snippets/new")
 
       form =
@@ -20,7 +20,7 @@ defmodule ReviewRoomWeb.SnippetLive.NewTest do
       assert has_element?(lv, "#snippet-confirmation", "Refactoring Phoenix contexts")
     end
 
-    test "displays inline errors when required fields missing", %{conn: conn} do
+    test "given missing required fields then errors render inline", %{conn: conn} do
       {:ok, lv, _html} = live(conn, ~p"/snippets/new")
 
       form =
