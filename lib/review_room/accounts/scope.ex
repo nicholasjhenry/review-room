@@ -20,6 +20,17 @@ defmodule ReviewRoom.Accounts.Scope do
 
   defstruct user: nil
 
+  @typedoc """
+  ## Fields
+
+  A Scope has these fields:
+
+  - `:user`
+  """
+  @type t :: %__MODULE__{
+          user: User.t() | nil
+        }
+
   @doc """
   Creates a scope for the given user.
 

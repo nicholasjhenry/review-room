@@ -14,6 +14,17 @@ defmodule ReviewRoom.Snippets.Buffer do
   defmodule Entry do
     @enforce_keys [:buffer_token, :payload, :queued_at, :attempts, :scope_key]
     defstruct [:buffer_token, :payload, :queued_at, :attempts, :scope_key, :last_error]
+
+    @type scope_key :: {:user, Ecto.UUID.t()}
+
+    @type t :: %__MODULE__{
+            buffer_token: Ecto.UUID.t(),
+            payload: map(),
+            queued_at: DateTime.t(),
+            attempts: non_neg_integer(),
+            scope_key: scope_key(),
+            last_error: {term(), term()} | nil
+          }
   end
 
   defmodule State do
@@ -23,6 +34,16 @@ defmodule ReviewRoom.Snippets.Buffer do
               queues: %{},
               timers: %{},
               dead_letters: []
+
+    @type scope_key :: {:user, Ecto.UUID.t()}
+
+    @type t :: %__MODULE__{
+            config: map(),
+            repo: module(),
+            queues: %{scope_key() => [Entry.t()]},
+            timers: %{scope_key() => reference()},
+            dead_letters: [Entry.t()]
+          }
   end
 
   @type server_option :: {:server, GenServer.server()}
