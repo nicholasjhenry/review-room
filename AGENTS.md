@@ -523,3 +523,10 @@ And **never** do this:
 
 <!-- phoenix:phoenix-end -->
 <!-- usage-rules-end -->
+
+## Active Technologies
+- Elixir ~> 1.15, Phoenix ~> 1.8.1 + Phoenix LiveView/UI components, Ecto (Repo), Req (existing), Phoenix PubSub for notifications (001-create-snippet)
+- PostgreSQL (durable) plus supervised `ReviewRoom.Snippets.Buffer` GenServer maintaining in-memory queue per scope (001-create-snippet)
+
+## Recent Changes
+- 001-create-snippet: Added Elixir ~> 1.15, Phoenix ~> 1.8.1 + Phoenix LiveView/UI components, Ecto (Repo), Req (existing), Phoenix PubSub for notifications
