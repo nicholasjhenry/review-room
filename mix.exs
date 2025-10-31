@@ -74,6 +74,7 @@ defmodule ReviewRoom.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.2.0"},
       {:bandit, "~> 1.5"},
+      {:html_sanitize_ex, "~> 1.4"},
       {:igniter, "~> 0.6", only: [:dev, :test]},
       {:tidewave, "~> 0.1", only: [:dev]},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}

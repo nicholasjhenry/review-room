@@ -24,6 +24,30 @@ config :review_room,
   ecto_repos: [ReviewRoom.Repo],
   generators: [timestamp_type: :utc_datetime, binary_id: true]
 
+# Snippet configuration
+config :review_room, :snippet_languages, [
+  %{name: "Elixir", code: "elixir"},
+  %{name: "JavaScript", code: "javascript"},
+  %{name: "TypeScript", code: "typescript"},
+  %{name: "Python", code: "python"},
+  %{name: "Java", code: "java"},
+  %{name: "Go", code: "go"},
+  %{name: "Ruby", code: "ruby"},
+  %{name: "PHP", code: "php"},
+  %{name: "C", code: "c"},
+  %{name: "C++", code: "cpp"},
+  %{name: "C#", code: "csharp"},
+  %{name: "SQL", code: "sql"},
+  %{name: "HTML", code: "html"},
+  %{name: "CSS", code: "css"},
+  %{name: "Shell/Bash", code: "bash"},
+  %{name: "Markdown", code: "markdown"}
+]
+
+# 1MB
+config :review_room, :snippet_max_size, 1_048_576
+config :review_room, :snippet_max_tags, 10
+
 # Configures the endpoint
 config :review_room, ReviewRoomWeb.Endpoint,
   url: [host: "localhost"],

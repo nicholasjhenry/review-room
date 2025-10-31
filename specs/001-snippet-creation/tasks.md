@@ -21,13 +21,13 @@
 
 **Purpose**: Project initialization and configuration
 
-- [ ] T001 [P] Add snippet language configuration to config/config.exs
-- [ ] T002 [P] Add html_sanitize_ex dependency to mix.exs
-- [ ] T003 [P] Install Highlight.js via npm in assets/
-- [ ] T004 [P] Configure Highlight.js import in assets/js/app.js
-- [ ] T005 [P] Create syntax highlighter hook in assets/js/hooks/syntax_highlighter.js
-- [ ] T006 Run mix deps.get to install Elixir dependencies
-- [ ] T007 Run cd assets && npm install to install JS dependencies
+- [X] T001 [P] Add snippet language configuration to config/config.exs
+- [X] T002 [P] Add html_sanitize_ex dependency to mix.exs
+- [X] T003 [P] Install Highlight.js via npm in assets/
+- [X] T004 [P] Configure Highlight.js import in assets/js/app.js
+- [X] T005 [P] Create syntax highlighter hook in assets/js/hooks/syntax_highlighter.js
+- [X] T006 Run mix deps.get to install Elixir dependencies
+- [X] T007 Run cd assets && npm install to install JS dependencies
 
 ---
 
@@ -37,11 +37,11 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T008 Generate migration with mix ecto.gen.migration create_snippets
-- [ ] T009 Implement CreateSnippets migration in priv/repo/migrations/YYYYMMDDHHMMSS_create_snippets.exs
-- [ ] T010 Run mix ecto.migrate to create snippets table
-- [ ] T011 Create Snippet schema in lib/review_room/snippets/snippet.ex with validations
-- [ ] T012 Create Snippets context module stub in lib/review_room/snippets.ex
+- [X] T008 Generate migration with mix ecto.gen.migration create_snippets
+- [X] T009 Implement CreateSnippets migration in priv/repo/migrations/YYYYMMDDHHMMSS_create_snippets.exs
+- [X] T010 Run mix ecto.migrate to create snippets table
+- [X] T011 Create Snippet schema in lib/review_room/snippets/snippet.ex with validations
+- [X] T012 Create Snippets context module stub in lib/review_room/snippets.ex
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
