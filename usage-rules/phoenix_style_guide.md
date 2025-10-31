@@ -61,4 +61,11 @@ Record modules are denoted by the use of the macro:
 use MyApp, :record
 ```
 
+Documentation:
+
 *NEVER* document record functions; i.e. `@doc false`
+
+Testing:
+
+- *NEVER* test record functions directly
+- *ONLY* test record functions via action functions context module

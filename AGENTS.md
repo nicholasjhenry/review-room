@@ -18,8 +18,8 @@ Only after reading these should you proceed with any tasks.
 Before performing the tasks listed below, you **MUST** read the associated file and follow those standards exactly.
 
 - **Before writing or modifying Phoenix code**: `usage-rules/phoenix_style_guide.md`
-- **Before writing or modifying Elixir tests**: `usage-rules/testing.md`
-- **Before writing or modifying TypeSpecs (including fixing Dialyzer errors)**: `usage-rules/typespecs.md`
+- **Before writing or modifying Elixir tests**: `usage-rules/testing_style_guide.md`
+- **Before writing or modifying TypeSpecs (including fixing Dialyzer errors)**: `usage-rules/typespecs_style_guide.md`
 
 <!-- phoenix-gen-auth-start -->
 ## Authentication
