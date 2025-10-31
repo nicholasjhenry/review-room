@@ -60,3 +60,5 @@ Record modules are denoted by the use of the macro:
 ```elixir
 use MyApp, :record
 ```
+
+*NEVER* document record functions; i.e. `@doc false`

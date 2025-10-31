@@ -1,4 +1,4 @@
-# Elixir Test Guidelines
+# Testing Style Guide
 
 ## Mandatory Testing
 - All code **MUST** be tested. Do not write production code without writing tests.

@@ -1,4 +1,4 @@
-## Typespec guidelines
+## Typespec Style Guide
 
 - ensure all public context modules have typespecs
 
