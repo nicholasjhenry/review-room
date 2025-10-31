@@ -56,6 +56,65 @@ defmodule ReviewRoom.SnippetsTest do
       assert {:error, changeset} = Snippets.create_snippet(scope, attrs)
       assert "Selected language is not supported." in errors_on(changeset).language
     end
+
+    test "given title and description then snippet stores metadata" do
+      scope = user_scope_fixture()
+
+      attrs = %{
+        code: "IO.puts(:metadata)",
+        language: "elixir",
+        title: "Helpful snippet",
+        description: "Explains how metadata is handled"
+      }
+
+      assert {:ok, %Snippet{} = snippet} = Snippets.create_snippet(scope, attrs)
+      assert snippet.title == "Helpful snippet"
+      assert snippet.description == "Explains how metadata is handled"
+    end
+
+    test "given missing title then snippet stores default nil title" do
+      scope = user_scope_fixture()
+
+      attrs = %{
+        code: "IO.puts(:no_title)",
+        language: "elixir",
+        description: "Snippet without a title"
+      }
+
+      assert {:ok, %Snippet{} = snippet} = Snippets.create_snippet(scope, attrs)
+      assert snippet.title == nil
+      assert snippet.description == "Snippet without a title"
+    end
+
+    test "given html in metadata then snippet sanitizes fields" do
+      scope = user_scope_fixture()
+
+      attrs = %{
+        code: "IO.puts(:sanitize)",
+        language: "elixir",
+        title: "<b>Bold</b>",
+        description: "<script>alert('xss')</script>Safe"
+      }
+
+      assert {:ok, %Snippet{} = snippet} = Snippets.create_snippet(scope, attrs)
+      assert snippet.title == "Bold"
+      refute String.contains?(snippet.title, "<")
+      refute String.contains?(snippet.description, "<")
+      assert snippet.description =~ "Safe"
+    end
+
+    test "given title exceeding limit then error changeset is returned" do
+      scope = user_scope_fixture()
+
+      attrs = %{
+        code: "IO.puts(:too_long)",
+        language: "elixir",
+        title: String.duplicate("a", 256)
+      }
+
+      assert {:error, changeset} = Snippets.create_snippet(scope, attrs)
+      assert "should be at most 255 character(s)" in errors_on(changeset).title
+    end
   end
 
   describe "when fetching a snippet" do
