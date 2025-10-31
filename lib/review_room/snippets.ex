@@ -95,4 +95,56 @@ defmodule ReviewRoom.Snippets do
     |> preload(:user)
     |> Repo.all()
   end
+
+  ## Configuration helpers
+
+  @doc """
+  Returns the configured snippet languages.
+  """
+  @spec supported_languages() :: [%{code: String.t(), name: String.t()}]
+  def supported_languages do
+    Application.get_env(:review_room, :snippet_languages, [])
+  end
+
+  @doc """
+  Returns supported languages as select options.
+  """
+  @spec supported_language_options() :: [{String.t(), String.t()}]
+  def supported_language_options do
+    supported_languages()
+    |> Enum.map(fn language ->
+      name =
+        Map.get(language, :name) ||
+          Map.get(language, "name") ||
+          Map.get(language, :code) ||
+          Map.get(language, "code")
+
+      code =
+        Map.get(language, :code) ||
+          Map.get(language, "code") ||
+          (is_binary(name) && String.downcase(name)) ||
+          ""
+
+      {name, code}
+    end)
+  end
+
+  @doc """
+  Returns the human readable language label for a given language code.
+  """
+  @spec language_label(String.t()) :: String.t()
+  def language_label(code) when is_binary(code) do
+    supported_languages()
+    |> Enum.find_value(code, fn language ->
+      stored_code = Map.get(language, :code) || Map.get(language, "code")
+
+      if stored_code == code do
+        Map.get(language, :name) || Map.get(language, "name")
+      end
+    end)
+    |> case do
+      nil -> code
+      label -> label
+    end
+  end
 end

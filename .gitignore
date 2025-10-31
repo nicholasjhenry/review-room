@@ -38,3 +38,18 @@ npm-debug.log
 # .gitignore
 /priv/plts/*.plt
 /priv/plts/*.plt.hash
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Editor swap files
+*.tmp
+*.swp
+.vscode/
+.idea/
+
+# Environment files
+.env
+.env.*
+!.env.example

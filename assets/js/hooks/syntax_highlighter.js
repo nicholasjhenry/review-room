@@ -10,18 +10,32 @@ const SyntaxHighlighter = {
   highlight() {
     const codeBlocks = this.el.querySelectorAll('pre code');
     codeBlocks.forEach((block) => {
-      // Remove existing highlighting classes
-      block.className = '';
+      const preservedClasses = Array.from(block.classList).filter((className) => {
+        return !className.startsWith('language-') && className !== 'hljs';
+      });
 
-      // Get language from data attribute
       const language = block.dataset.language;
-      if (language) {
-        block.classList.add(`language-${language}`);
-      }
+      const code = block.textContent;
 
-      // Apply Highlight.js
-      if (window.hljs) {
-        window.hljs.highlightElement(block);
+      if (window.hljs && code) {
+        let highlightedHtml;
+
+        if (language && window.hljs.getLanguage(language)) {
+          highlightedHtml = window.hljs.highlight(code, { language }).value;
+          preservedClasses.push(`language-${language}`);
+        } else {
+          const { language: detectedLanguage, value } = window.hljs.highlightAuto(code);
+          highlightedHtml = value;
+
+          if (detectedLanguage) {
+            preservedClasses.push(`language-${detectedLanguage}`);
+          }
+        }
+
+        preservedClasses.push('hljs');
+
+        block.innerHTML = highlightedHtml;
+        block.className = preservedClasses.join(' ');
       }
     });
   }

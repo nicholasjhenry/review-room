@@ -55,29 +55,29 @@
 
 ### Tests for User Story 1 (Write these FIRST) ⚠️
 
-- [ ] T013 [P] [US1] Write unit test: create_snippet with valid data in test/review_room/snippets_test.exs
-- [ ] T014 [P] [US1] Write unit test: create_snippet with missing code returns error in test/review_room/snippets_test.exs
-- [ ] T015 [P] [US1] Write unit test: create_snippet with missing language returns error in test/review_room/snippets_test.exs
-- [ ] T016 [P] [US1] Write unit test: create_snippet with unsupported language returns error in test/review_room/snippets_test.exs
-- [ ] T017 [P] [US1] Write unit test: get_snippet for owner returns snippet in test/review_room/snippets_test.exs
-- [ ] T018 [P] [US1] Write integration test: LiveView displays snippet creation form in test/review_room_web/live/snippet_live_test.exs
-- [ ] T019 [P] [US1] Write integration test: Submit valid snippet form creates snippet in test/review_room_web/live/snippet_live_test.exs
-- [ ] T020 [P] [US1] Write integration test: Submit invalid snippet form shows validation errors in test/review_room_web/live/snippet_live_test.exs
-- [ ] T021 [P] [US1] Write integration test: View snippet displays code with syntax highlighting in test/review_room_web/live/snippet_live_test.exs
-- [ ] T022 Run mix test to verify all US1 tests FAIL before implementation
+- [X] T013 [P] [US1] Write unit test: create_snippet with valid data in test/review_room/snippets_test.exs
+- [X] T014 [P] [US1] Write unit test: create_snippet with missing code returns error in test/review_room/snippets_test.exs
+- [X] T015 [P] [US1] Write unit test: create_snippet with missing language returns error in test/review_room/snippets_test.exs
+- [X] T016 [P] [US1] Write unit test: create_snippet with unsupported language returns error in test/review_room/snippets_test.exs
+- [X] T017 [P] [US1] Write unit test: get_snippet for owner returns snippet in test/review_room/snippets_test.exs
+- [X] T018 [P] [US1] Write integration test: LiveView displays snippet creation form in test/review_room_web/live/snippet_live_test.exs
+- [X] T019 [P] [US1] Write integration test: Submit valid snippet form creates snippet in test/review_room_web/live/snippet_live_test.exs
+- [X] T020 [P] [US1] Write integration test: Submit invalid snippet form shows validation errors in test/review_room_web/live/snippet_live_test.exs
+- [X] T021 [P] [US1] Write integration test: View snippet displays code with syntax highlighting in test/review_room_web/live/snippet_live_test.exs
+- [X] T022 Run mix test to verify all US1 tests FAIL before implementation
 
 ### Implementation for User Story 1
 
-- [ ] T023 [P] [US1] Implement create_snippet/2 function in lib/review_room/snippets.ex
-- [ ] T024 [P] [US1] Implement change_snippet/2 function in lib/review_room/snippets.ex
-- [ ] T025 [P] [US1] Implement get_snippet/2 function with authorization in lib/review_room/snippets.ex
-- [ ] T026 [US1] Create SnippetLive.New LiveView in lib/review_room_web/live/snippet_live/new.ex
-- [ ] T027 [US1] Create new.html.heex template for snippet creation in lib/review_room_web/live/snippet_live/new.html.heex
-- [ ] T028 [US1] Create SnippetLive.Show LiveView in lib/review_room_web/live/snippet_live/show.ex
-- [ ] T029 [US1] Create show.html.heex template for snippet display in lib/review_room_web/live/snippet_live/show.html.heex
-- [ ] T030 [US1] Add snippet routes to lib/review_room_web/router.ex in :require_authenticated_user scope
-- [ ] T031 Run mix test test/review_room/snippets_test.exs to verify US1 unit tests PASS
-- [ ] T032 Run mix test test/review_room_web/live/snippet_live_test.exs to verify US1 integration tests PASS
+- [X] T023 [P] [US1] Implement create_snippet/2 function in lib/review_room/snippets.ex
+- [X] T024 [P] [US1] Implement change_snippet/2 function in lib/review_room/snippets.ex
+- [X] T025 [P] [US1] Implement get_snippet/2 function with authorization in lib/review_room/snippets.ex
+- [X] T026 [US1] Create SnippetLive.New LiveView in lib/review_room_web/live/snippet_live/new.ex
+- [X] T027 [US1] Create new.html.heex template for snippet creation in lib/review_room_web/live/snippet_live/new.html.heex
+- [X] T028 [US1] Create SnippetLive.Show LiveView in lib/review_room_web/live/snippet_live/show.ex
+- [X] T029 [US1] Create show.html.heex template for snippet display in lib/review_room_web/live/snippet_live/show.html.heex
+- [X] T030 [US1] Add snippet routes to lib/review_room_web/router.ex in :require_authenticated_user scope
+- [X] T031 Run mix test test/review_room/snippets_test.exs to verify US1 unit tests PASS
+- [X] T032 Run mix test test/review_room_web/live/snippet_live_test.exs to verify US1 integration tests PASS
 
 **Checkpoint**: User Story 1 complete - developers can create and view basic snippets with syntax highlighting
 
