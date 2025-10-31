@@ -1,0 +1,58 @@
+<section id="snippet-new" class="mx-auto max-w-3xl px-4 py-6">
+  <header class="mb-6">
+    <h1 class="text-3xl font-semibold">Create Snippet</h1>
+    <p class="mt-2 text-base text-base-content/70">
+      Save your code snippet with syntax highlighting for quick reference.
+    </p>
+  </header>
+
+  <.form
+    for={@form}
+    id="snippet-form"
+    phx-submit="save"
+    phx-change="validate"
+    class="space-y-6"
+  >
+    <div class="grid gap-4 md:grid-cols-2">
+      <.input field={@form[:title]} label="Title" placeholder="Optional title" />
+      <.input
+        field={@form[:language]}
+        type="select"
+        label="Language"
+        prompt="Select a language"
+        options={@language_options}
+      />
+    </div>
+
+    <div class="grid gap-4 md:grid-cols-2">
+      <.input
+        field={@form[:visibility]}
+        type="select"
+        label="Visibility"
+        options={@visibility_options}
+      />
+      <.input
+        field={@form[:description]}
+        type="textarea"
+        rows="3"
+        label="Description"
+        placeholder="Optional description"
+      />
+    </div>
+
+    <.input
+      field={@form[:code]}
+      type="textarea"
+      label="Code"
+      rows="16"
+      autocomplete="off"
+      spellcheck="false"
+      class="font-mono text-sm"
+      placeholder="Paste or write your code here"
+    />
+
+    <div class="flex justify-end gap-3">
+      <.button type="submit" phx-disable-with="Saving...">Save Snippet</.button>
+    </div>
+  </.form>
+</section>

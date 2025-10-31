@@ -1,0 +1,21 @@
+<section id="snippet-show" class="mx-auto max-w-3xl px-4 py-6">
+  <header class="mb-6 space-y-1">
+    <h1 class="text-3xl font-semibold">{@display_title}</h1>
+    <p class="text-base text-base-content/70">
+      Language: {@language_label}
+    </p>
+  </header>
+
+  <div
+    id="snippet-display"
+    phx-hook="SyntaxHighlighter"
+    phx-update="ignore"
+    class="rounded-lg border border-base-300 bg-base-200"
+  >
+    <pre class="overflow-x-auto p-4 text-sm">
+      <code id="snippet-code" data-language={@snippet.language} class="block whitespace-pre">
+{@snippet.code}
+      </code>
+    </pre>
+  </div>
+</section>

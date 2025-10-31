@@ -40,9 +40,9 @@ defmodule ReviewRoom.Snippets.Snippet do
           updated_at: NaiveDateTime.t() | nil
         }
 
-  # 1MB in bytes
-  @max_code_size 1_048_576
-  @max_tags 10
+  # Values configured via config/config.exs
+  @max_code_size Application.compile_env(:review_room, :snippet_max_size, 1_048_576)
+  @max_tags Application.compile_env(:review_room, :snippet_max_tags, 10)
   @visibility_values ~w(private public)
 
   @primary_key {:id, :binary_id, autogenerate: true}
