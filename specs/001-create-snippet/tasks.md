@@ -74,17 +74,17 @@ description: "Task list template for feature implementation"
 
 ### Tests for User Story 2 (MANDATORY - write these first) ⚠️
 
-- [ ] T015 [P] [US2] Extend context tests to cover tag normalization, duplicate rejection, and syntax validation in test/review_room/snippets/snippets_test.exs.
-- [ ] T016 [P] [US2] Extend LiveView tests to assert syntax dropdown rendering and tag persistence in test/review_room_web/live/snippet_live_new_test.exs.
+- [x] T015 [P] [US2] Extend context tests to cover tag normalization, duplicate rejection, and syntax validation in test/review_room/snippets/snippets_test.exs.
+- [x] T016 [P] [US2] Extend LiveView tests to assert syntax dropdown rendering and tag persistence in test/review_room_web/live/snippet_live_new_test.exs.
 
 ### Implementation for User Story 2
 
-- [ ] T017 [P] [US2] Implement ReviewRoom.Snippets.SyntaxRegistry backed by curated config in lib/review_room/snippets/syntax_registry.ex.
-- [ ] T018 [P] [US2] Implement ReviewRoom.Snippets.TagCatalog loader that exposes options and validation helpers in lib/review_room/snippets/tag_catalog.ex.
-- [ ] T019 [US2] Update Snippet changeset to normalize, deduplicate, and cap tags plus enforce allowed syntax values in lib/review_room/snippets/snippet.ex.
-- [ ] T020 [US2] Update Snippets context to expose syntax_options/1 and tags_catalog/1 helpers consumed by the LiveView in lib/review_room/snippets.ex.
-- [ ] T021 [US2] Update LiveView to load curated syntax/tag options and render multi-select inputs in lib/review_room_web/live/snippet_live/new.ex.
-- [ ] T022 [P] [US2] Add reusable snippet form components for syntax select and tag chips in lib/review_room_web/components/snippet_form_components.ex.
+- [x] T017 [P] [US2] Implement ReviewRoom.Snippets.SyntaxRegistry backed by curated config in lib/review_room/snippets/syntax_registry.ex.
+- [x] T018 [P] [US2] Implement ReviewRoom.Snippets.TagCatalog loader that exposes options and validation helpers in lib/review_room/snippets/tag_catalog.ex.
+- [x] T019 [US2] Update Snippet changeset to normalize, deduplicate, and cap tags plus enforce allowed syntax values in lib/review_room/snippets/snippet.ex.
+- [x] T020 [US2] Update Snippets context to expose syntax_options/1 and tags_catalog/1 helpers consumed by the LiveView in lib/review_room/snippets.ex.
+- [x] T021 [US2] Update LiveView to load curated syntax/tag options and render multi-select inputs in lib/review_room_web/live/snippet_live/new.ex.
+- [x] T022 [P] [US2] Add reusable snippet form components for syntax select and tag chips in lib/review_room_web/components/snippet_form_components.ex.
 
 **Checkpoint**: User Story 2 complete ensures snippets persist curated syntax and normalized tags for discovery.
 
@@ -97,15 +97,15 @@ description: "Task list template for feature implementation"
 
 ### Tests for User Story 3 (MANDATORY - write these first) ⚠️
 
-- [ ] T023 [P] [US3] Extend context tests to cover default visibility, allowed values, and scope filtering in test/review_room/snippets/snippets_test.exs.
-- [ ] T024 [P] [US3] Extend LiveView tests verifying visibility option filtering and default notices in test/review_room_web/live/snippet_live_new_test.exs.
+- [x] T023 [P] [US3] Extend context tests to cover default visibility, allowed values, and scope filtering in test/review_room/snippets/snippets_test.exs.
+- [x] T024 [P] [US3] Extend LiveView tests verifying visibility option filtering and default notices in test/review_room_web/live/snippet_live_new_test.exs.
 
 ### Implementation for User Story 3
 
-- [ ] T025 [US3] Update Snippet changeset to enforce allowed visibility values and default to personal in lib/review_room/snippets/snippet.ex.
-- [ ] T026 [US3] Implement scope-aware visibility guardrails and flush permission checks in lib/review_room/snippets.ex.
-- [ ] T027 [US3] Update LiveView to filter visibility options via Accounts.Scope and surface defaulting notices in lib/review_room_web/live/snippet_live/new.ex.
-- [ ] T028 [US3] Emit visibility audit telemetry/log fields for buffer enqueue events in lib/review_room/telemetry.ex.
+- [x] T025 [US3] Update Snippet changeset to enforce allowed visibility values and default to personal in lib/review_room/snippets/snippet.ex.
+- [x] T026 [US3] Implement scope-aware visibility guardrails and flush permission checks in lib/review_room/snippets.ex.
+- [x] T027 [US3] Update LiveView to filter visibility options via Accounts.Scope and surface defaulting notices in lib/review_room_web/live/snippet_live/new.ex.
+- [x] T028 [US3] Emit visibility audit telemetry/log fields for buffer enqueue events in lib/review_room/telemetry.ex.
 
 **Checkpoint**: User Story 3 complete enforces visibility choices end-to-end and logs decisions for audit.
 
@@ -115,9 +115,9 @@ description: "Task list template for feature implementation"
 
 **Purpose**: Finalize demo data, documentation, and observability for the snippet creation feature.
 
-- [ ] T029 Seed demo snippets for each visibility level with curated tags in priv/repo/seeds.exs.
-- [ ] T030 [P] Document snippet creation workflow, manual flush, and metadata expectations in README.md.
-- [ ] T031 [P] Update quickstart walkthrough with telemetry verification steps in specs/001-create-snippet/quickstart.md.
+- [x] T029 Seed demo snippets for each visibility level with curated tags in priv/repo/seeds.exs.
+- [x] T030 [P] Document snippet creation workflow, manual flush, and metadata expectations in README.md.
+- [x] T031 [P] Update quickstart walkthrough with telemetry verification steps in specs/001-create-snippet/quickstart.md.
 
 ---
 

@@ -11,6 +11,8 @@ defmodule ReviewRoomWeb.SnippetLive.New do
       socket
       |> assign(:current_scope, scope)
       |> assign(:last_submission, nil)
+      |> assign(:syntax_options, Snippets.syntax_options())
+      |> assign(:tags_catalog, Snippets.tags_catalog())
       |> assign_form(changeset)
 
     {:ok, socket}
@@ -35,12 +37,6 @@ defmodule ReviewRoomWeb.SnippetLive.New do
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign_form(socket, Map.put(changeset, :action, :validate))}
-
-      {:error, _reason} ->
-        {:noreply,
-         socket
-         |> put_flash(:error, "Failed to queue snippet. Please try again.")
-         |> assign(:last_submission, nil)}
     end
   end
 
@@ -95,7 +91,13 @@ defmodule ReviewRoomWeb.SnippetLive.New do
             <.input field={@form[:title]} type="text" label="Title" />
             <.input field={@form[:description]} type="textarea" label="Description" />
             <.input field={@form[:body]} type="textarea" label="Code / Body" />
-            <.input field={@form[:syntax]} type="text" label="Syntax" />
+            <.input
+              field={@form[:syntax]}
+              type="select"
+              label="Language"
+              options={@syntax_options}
+              prompt="Select language"
+            />
             <.input
               field={@form[:visibility]}
               type="select"
@@ -111,7 +113,7 @@ defmodule ReviewRoomWeb.SnippetLive.New do
               field={@form[:tags]}
               type="text"
               label="Tags"
-              placeholder="Comma separated tags"
+              placeholder="Comma separated tags (e.g., api, testing, web)"
             />
 
             <div class="mt-4 flex gap-3">

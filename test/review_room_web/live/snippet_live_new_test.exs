@@ -28,9 +28,8 @@ defmodule ReviewRoomWeb.SnippetLive.NewTest do
           snippet: %{
             "title" => "",
             "description" => "",
-            "body" => "",
-            "syntax" => "",
-            "visibility" => ""
+            "body" => ""
+            # syntax and visibility have defaults, so we don't test them as blank
           }
         )
 
@@ -39,12 +38,13 @@ defmodule ReviewRoomWeb.SnippetLive.NewTest do
       assert html =~ "can&#39;t be blank"
       assert html =~ "input-error"
       assert html =~ "textarea-error"
-      assert html =~ "select-error"
+      # No select-error expected since syntax and visibility have defaults
     end
   end
 
   defmodule StubBuffer do
     def enqueue(scope, payload, opts \\ [])
+
     def enqueue(%ReviewRoom.Accounts.Scope{}, _payload, _opts) do
       {:ok,
        %{buffer_token: "fake-token", position: 3, estimated_flush_at: ~U[2025-10-30 20:00:00Z]}}

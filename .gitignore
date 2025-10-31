@@ -38,3 +38,22 @@ npm-debug.log
 # .gitignore
 /priv/plts/*.plt
 /priv/plts/*.plt.hash
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Log files
+*.log
