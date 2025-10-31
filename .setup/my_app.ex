@@ -4,7 +4,7 @@ defmodule MyApp do
     quote do
       use Ecto.Schema
 
-      alias Nomify.Identifier
+      alias MyApp.Identifier
 
       import Ecto.Changeset
       import Ecto.Query, warn: false
