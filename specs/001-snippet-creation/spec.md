@@ -112,37 +112,38 @@ A developer wants to control who can view their snippet so they can keep sensiti
 
 ### Key Entities
 
-- **Snippet**: Represents a code snippet created by a developer. Key attributes include code content (text), syntax highlighting language, title (optional), description (optional), visibility/privacy level, creation timestamp, and last modified timestamp. Associated with a developer (creator).
-- **Tag**: Represents a categorization label that can be applied to snippets. Key attributes include tag name. Relationship: Many-to-many with Snippets (a snippet can have multiple tags, a tag can be on multiple snippets).
+- **Snippet**: Represents a code snippet created by a developer. Key attributes include code content (text), syntax highlighting language, title (optional), description (optional), visibility/privacy level, tags (array of strings), creation timestamp, and last modified timestamp. Associated with a developer (creator).
 - **Developer/User**: The creator and owner of snippets. Relationship: One-to-many with Snippets (a developer can create many snippets).
 
 ## Test Plan *(mandatory before implementation)*
 
 ### Unit Tests *(write these first)*
 
-- Test snippet changeset validation with valid data (code content, language, title, description, tags, visibility)
-- Test snippet changeset validation with missing required code content (should fail)
-- Test snippet changeset validation with invalid language selection
-- Test snippet changeset validation with visibility defaulting to private when not specified
-- Test snippet changeset with XSS attempts in title/description (should be sanitized)
-- Test snippet changeset with code content exceeding maximum size (should fail)
-- Test snippet changeset with too many tags (should fail)
-- Test tag creation and association with snippets
-- Test snippet authorization logic for private snippets (owner can access, others cannot)
-- Test snippet authorization logic for team-only snippets (team members can access, others cannot)
-- Test snippet authorization logic for public snippets (anyone can access)
+**Note**: Per Phoenix style guide, record functions (schemas/changesets) are NOT tested directly. All validation is tested through context action functions.
+
+- Test snippet creation via context with valid data (code content, language, title, description, tags, visibility)
+- Test snippet creation via context with missing required code content (should return error)
+- Test snippet creation via context with invalid language selection (should return error)
+- Test snippet creation via context with visibility defaulting to private when not specified
+- Test snippet creation via context with XSS attempts in title/description (should be sanitized)
+- Test snippet creation via context with code content exceeding maximum size (should return error)
+- Test snippet creation via context with too many tags (should return error)
+- Test snippet creation via context with whitespace and duplicate tags (should normalize)
+- Test snippet retrieval via context for authorized user (owner can access)
+- Test snippet retrieval via context for unauthorized user (private snippet, should return nil)
+- Test snippet retrieval via context for public snippet (any user can access)
 
 ### Integration Tests *(required for each cross-boundary interaction)*
 
 - LiveView test: Create a new snippet with all fields populated, verify it's saved to database
 - LiveView test: Create a snippet with only required fields (code and language), verify defaults are applied
 - LiveView test: Attempt to create a snippet without code content, verify validation error displays
-- LiveView test: Create a snippet with multiple tags, verify all tags are saved
+- LiveView test: Create a snippet with multiple tags, verify all tags are saved in array field
 - LiveView test: Create a private snippet, verify another user cannot access it
 - LiveView test: Create a public snippet, verify it's accessible to other users
 - LiveView test: View a snippet with syntax highlighting, verify correct CSS classes are applied
 - Database test: Verify snippet is correctly associated with creating user
-- Database test: Verify many-to-many relationship between snippets and tags works correctly
+- Database test: Verify tags array field stores and retrieves tags correctly
 - Form submission test: Submit snippet creation form with valid data, verify success response
 - Form submission test: Submit snippet creation form with invalid data, verify error response and error messages display
 
