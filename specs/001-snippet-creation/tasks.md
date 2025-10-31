@@ -91,20 +91,20 @@
 
 ### Tests for User Story 2 (Write these FIRST) ⚠️
 
-- [ ] T033 [P] [US2] Write unit test: create_snippet with title and description in test/review_room/snippets_test.exs
-- [ ] T034 [P] [US2] Write unit test: create_snippet without title defaults gracefully in test/review_room/snippets_test.exs
-- [ ] T035 [P] [US2] Write unit test: create_snippet with HTML in title/description sanitizes in test/review_room/snippets_test.exs
-- [ ] T036 [P] [US2] Write unit test: create_snippet with title exceeding 255 chars returns error in test/review_room/snippets_test.exs
-- [ ] T037 [P] [US2] Write integration test: Submit snippet with title and description saves both in test/review_room_web/live/snippet_live_test.exs
-- [ ] T038 [P] [US2] Write integration test: View snippet displays title and description in test/review_room_web/live/snippet_live_test.exs
-- [ ] T039 Run mix test to verify all US2 tests FAIL before implementation
+- [X] T033 [P] [US2] Write unit test: create_snippet with title and description in test/review_room/snippets_test.exs
+- [X] T034 [P] [US2] Write unit test: create_snippet without title defaults gracefully in test/review_room/snippets_test.exs
+- [X] T035 [P] [US2] Write unit test: create_snippet with HTML in title/description sanitizes in test/review_room/snippets_test.exs
+- [X] T036 [P] [US2] Write unit test: create_snippet with title exceeding 255 chars returns error in test/review_room/snippets_test.exs
+- [X] T037 [P] [US2] Write integration test: Submit snippet with title and description saves both in test/review_room_web/live/snippet_live_test.exs
+- [X] T038 [P] [US2] Write integration test: View snippet displays title and description in test/review_room_web/live/snippet_live_test.exs
+- [X] T039 Run mix test to verify all US2 tests FAIL before implementation
 
 ### Implementation for User Story 2
 
-- [ ] T040 [US2] Update new.html.heex template to include title and description fields in lib/review_room_web/live/snippet_live/new.html.heex
-- [ ] T041 [US2] Update show.html.heex template to display title and description in lib/review_room_web/live/snippet_live/show.html.heex
-- [ ] T042 Run mix test test/review_room/snippets_test.exs to verify US2 unit tests PASS
-- [ ] T043 Run mix test test/review_room_web/live/snippet_live_test.exs to verify US2 integration tests PASS
+- [X] T040 [US2] Update new.html.heex template to include title and description fields in lib/review_room_web/live/snippet_live/new.html.heex
+- [X] T041 [US2] Update show.html.heex template to display title and description in lib/review_room_web/live/snippet_live/show.html.heex
+- [X] T042 Run mix test test/review_room/snippets_test.exs to verify US2 unit tests PASS
+- [X] T043 Run mix test test/review_room_web/live/snippet_live_test.exs to verify US2 integration tests PASS
 
 **Checkpoint**: User Story 2 complete - snippets now support title and description metadata
 

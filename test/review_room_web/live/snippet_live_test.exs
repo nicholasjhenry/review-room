@@ -40,6 +40,30 @@ defmodule ReviewRoomWeb.SnippetLiveTest do
 
       assert html =~ "Sample snippet"
       assert html =~ "IO.puts(:ok)"
+      assert snippet.title == "Sample snippet"
+      assert snippet.description == "Elixir example"
+    end
+
+    test "given metadata params then snippet persists sanitized title and description", %{
+      conn: conn,
+      scope: scope
+    } do
+      {:ok, lv, _html} = live(conn, ~p"/snippets/new")
+
+      form_params = %{
+        code: "IO.puts(:metadata)",
+        language: "elixir",
+        title: "<b>Important</b> snippet",
+        description: "<p>Keep this handy</p>"
+      }
+
+      lv
+      |> form("#snippet-form", snippet: form_params)
+      |> render_submit()
+
+      [snippet] = Snippets.list_my_snippets(scope)
+      assert snippet.title == "Important snippet"
+      assert snippet.description == "Keep this handy"
     end
 
     test "given invalid params then validation errors are shown", %{conn: conn} do
@@ -66,6 +90,22 @@ defmodule ReviewRoomWeb.SnippetLiveTest do
 
       assert has_element?(lv, "#snippet-display[phx-hook='SyntaxHighlighter']")
       assert has_element?(lv, "#snippet-code[data-language='elixir']", "IO.puts(:highlight)")
+    end
+
+    test "given snippet with title and description then metadata is displayed", %{
+      conn: conn,
+      scope: scope
+    } do
+      snippet =
+        snippet_fixture(scope, %{
+          title: "<b>Metadata</b>",
+          description: "<p>Displayed description</p>"
+        })
+
+      {:ok, _lv, html} = live(conn, ~p"/snippets/#{snippet}")
+
+      assert html =~ "Metadata"
+      assert html =~ "Displayed description"
     end
   end
 end
