@@ -18,6 +18,10 @@ defmodule ReviewRoom.Accounts.Scope do
 
   alias ReviewRoom.Accounts.User
 
+  @type t :: %__MODULE__{
+          user: User.t() | nil
+        }
+
   defstruct user: nil
 
   @doc """

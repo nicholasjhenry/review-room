@@ -1,6 +1,7 @@
 ## Typespec Style Guide
 
-- ensure all public context modules have typespecs
+- *ENSURE* all public context modules have typespecs
+- *NEVER* use a bare struct for types e.g. `Scope`, *MUST* be `Scope.t()`
 
 ### Ecto Schemas
 

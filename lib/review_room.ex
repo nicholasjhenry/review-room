@@ -11,6 +11,7 @@ defmodule ReviewRoom do
     quote do
       use Ecto.Schema
 
+      alias ReviewRoom.Attrs
       alias ReviewRoom.Identifier
 
       import Ecto.Changeset
