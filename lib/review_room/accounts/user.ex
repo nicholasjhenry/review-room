@@ -2,6 +2,31 @@ defmodule ReviewRoom.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @typedoc """
+  ## Fields
+
+  A user has these fields:
+
+  - `id` - unique identifier
+  - `email` - user's email address
+  - `password` - virtual field for password input
+  - `hashed_password` - bcrypt hashed password
+  - `confirmed_at` - timestamp when email was confirmed
+  - `authenticated_at` - virtual field for authentication tracking
+  - `inserted_at` - creation timestamp
+  - `updated_at` - last modification timestamp
+  """
+  @type t :: %__MODULE__{
+          id: Ecto.UUID.t() | nil,
+          email: String.t() | nil,
+          password: String.t() | nil,
+          hashed_password: String.t() | nil,
+          confirmed_at: DateTime.t() | nil,
+          authenticated_at: DateTime.t() | nil,
+          inserted_at: DateTime.t() | nil,
+          updated_at: DateTime.t() | nil
+        }
+
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
   schema "users" do
