@@ -103,10 +103,19 @@ defmodule ReviewRoom.Snippets.Snippet do
       tags when is_list(tags) ->
         normalized =
           tags
-          |> Enum.map(&String.trim/1)
-          |> Enum.reject(&(&1 == ""))
-          |> Enum.uniq()
-          |> Enum.take(@max_tags)
+          |> Enum.reduce([], fn tag, acc ->
+            trimmed =
+              tag
+              |> to_string()
+              |> String.trim()
+
+            cond do
+              trimmed == "" -> acc
+              trimmed in acc -> acc
+              true -> [trimmed | acc]
+            end
+          end)
+          |> Enum.reverse()
 
         put_change(changeset, :tags, normalized)
 
