@@ -75,6 +75,23 @@ defmodule ReviewRoomWeb.SnippetLiveTest do
 
       assert has_element?(lv, "#snippet-form .text-error", "can't be blank")
     end
+
+    test "given tags params then snippet persists normalized tags", %{conn: conn, scope: scope} do
+      {:ok, lv, _html} = live(conn, ~p"/snippets/new")
+
+      form_params = %{
+        code: "IO.puts(:tags)",
+        language: "elixir",
+        tags: " elixir , phoenix , elixir "
+      }
+
+      lv
+      |> form("#snippet-form", snippet: form_params)
+      |> render_submit()
+
+      [snippet] = Snippets.list_my_snippets(scope)
+      assert snippet.tags == ["elixir", "phoenix"]
+    end
   end
 
   describe "when viewing a snippet" do
@@ -106,6 +123,18 @@ defmodule ReviewRoomWeb.SnippetLiveTest do
 
       assert html =~ "Metadata"
       assert html =~ "Displayed description"
+    end
+
+    test "given snippet with tags then tags are displayed", %{conn: conn, scope: scope} do
+      snippet =
+        snippet_fixture(scope, %{
+          tags: ["elixir", "phoenix"]
+        })
+
+      {:ok, lv, _html} = live(conn, ~p"/snippets/#{snippet}")
+
+      assert has_element?(lv, "#snippet-tags [data-tag='elixir']", "elixir")
+      assert has_element?(lv, "#snippet-tags [data-tag='phoenix']", "phoenix")
     end
   end
 end

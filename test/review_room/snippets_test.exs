@@ -115,6 +115,57 @@ defmodule ReviewRoom.SnippetsTest do
       assert {:error, changeset} = Snippets.create_snippet(scope, attrs)
       assert "should be at most 255 character(s)" in errors_on(changeset).title
     end
+
+    test "given tags array then snippet stores all tags" do
+      scope = user_scope_fixture()
+
+      attrs = %{
+        code: "IO.puts(:tags)",
+        language: "elixir",
+        tags: ["phoenix", "elixir", "liveview"]
+      }
+
+      assert {:ok, %Snippet{} = snippet} = Snippets.create_snippet(scope, attrs)
+      assert snippet.tags == ["phoenix", "elixir", "liveview"]
+    end
+
+    test "given more than allowed tags then error changeset is returned" do
+      scope = user_scope_fixture()
+
+      attrs = %{
+        code: "IO.puts(:too_many_tags)",
+        language: "elixir",
+        tags: Enum.map(1..11, &"tag#{&1}")
+      }
+
+      assert {:error, changeset} = Snippets.create_snippet(scope, attrs)
+      assert "Maximum 10 tags allowed" in errors_on(changeset).tags
+    end
+
+    test "given tags with whitespace and duplicates then tags are normalized" do
+      scope = user_scope_fixture()
+
+      attrs = %{
+        code: "IO.puts(:normalize_tags)",
+        language: "elixir",
+        tags: [" elixir ", "phoenix", "elixir", "  phoenix  "]
+      }
+
+      assert {:ok, %Snippet{} = snippet} = Snippets.create_snippet(scope, attrs)
+      assert snippet.tags == ["elixir", "phoenix"]
+    end
+
+    test "given missing tags then snippet persists with empty list" do
+      scope = user_scope_fixture()
+
+      attrs = %{
+        code: "IO.puts(:no_tags)",
+        language: "elixir"
+      }
+
+      assert {:ok, %Snippet{} = snippet} = Snippets.create_snippet(scope, attrs)
+      assert snippet.tags == []
+    end
   end
 
   describe "when fetching a snippet" do
@@ -128,6 +179,67 @@ defmodule ReviewRoom.SnippetsTest do
         })
 
       assert ^snippet = Snippets.get_snippet(scope, snippet.id)
+    end
+  end
+
+  describe "when listing tags" do
+    test "given persisted snippets then list_all_tags returns unique tags" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+
+      {:ok, _} =
+        Snippets.create_snippet(scope, %{
+          code: "IO.puts(:first)",
+          language: "elixir",
+          tags: ["elixir", "phoenix"]
+        })
+
+      {:ok, _} =
+        Snippets.create_snippet(other_scope, %{
+          code: "IO.puts(:second)",
+          language: "elixir",
+          tags: ["phoenix", "liveview"]
+        })
+
+      assert Snippets.list_all_tags() == ["elixir", "liveview", "phoenix"]
+    end
+
+    test "given tag name then list_snippets_by_tag filters accessible snippets" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+
+      {:ok, own_private} =
+        Snippets.create_snippet(scope, %{
+          code: "IO.puts(:private_match)",
+          language: "elixir",
+          tags: ["elixir", "private"]
+        })
+
+      {:ok, other_public} =
+        Snippets.create_snippet(other_scope, %{
+          code: "IO.puts(:public_match)",
+          language: "elixir",
+          tags: ["elixir", "shared"],
+          visibility: "public"
+        })
+
+      {:ok, _non_matching} =
+        Snippets.create_snippet(scope, %{
+          code: "IO.puts(:different)",
+          language: "elixir",
+          tags: ["phoenix"]
+        })
+
+      results =
+        Snippets.list_snippets_by_tag(scope, "elixir")
+        |> Enum.map(& &1.id)
+        |> Enum.sort()
+
+      expected_ids =
+        [other_public.id, own_private.id]
+        |> Enum.sort()
+
+      assert results == expected_ids
     end
   end
 end

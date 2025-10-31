@@ -40,6 +40,18 @@
       />
     </div>
 
+    <div>
+      <.input
+        field={@form[:tags]}
+        value={tags_input_value(@form[:tags])}
+        label="Tags"
+        placeholder="Separate tags with commas"
+      />
+      <p class="mt-1 text-sm text-base-content/70">
+        Add up to 10 tags. Existing tags will be reused automatically.
+      </p>
+    </div>
+
     <.input
       field={@form[:code]}
       type="textarea"

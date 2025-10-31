@@ -20,6 +20,8 @@ defmodule ReviewRoomWeb.SnippetLive.New do
 
   @impl true
   def handle_event("validate", %{"snippet" => params}, socket) do
+    params = normalize_tag_params(params)
+
     changeset =
       %Snippet{}
       |> Snippets.change_snippet(params)
@@ -30,6 +32,8 @@ defmodule ReviewRoomWeb.SnippetLive.New do
 
   @impl true
   def handle_event("save", %{"snippet" => params}, socket) do
+    params = normalize_tag_params(params)
+
     case Snippets.create_snippet(socket.assigns.current_scope, params) do
       {:ok, snippet} ->
         {:noreply,
@@ -52,4 +56,31 @@ defmodule ReviewRoomWeb.SnippetLive.New do
       {"Public", "public"}
     ]
   end
+
+  defp normalize_tag_params(%{"tags" => tags} = params) do
+    Map.put(params, "tags", parse_tags(tags))
+  end
+
+  defp normalize_tag_params(params), do: params
+
+  defp parse_tags(tags) when is_binary(tags) do
+    tags
+    |> String.split([",", "\n"])
+    |> Enum.map(&String.trim/1)
+    |> Enum.reject(&(&1 == ""))
+  end
+
+  defp parse_tags(tags) when is_list(tags), do: tags
+  defp parse_tags(_), do: []
+
+  defp tags_input_value(%Phoenix.HTML.FormField{value: nil}), do: ""
+
+  defp tags_input_value(%Phoenix.HTML.FormField{value: value}) when is_list(value) do
+    value
+    |> Enum.reject(&(&1 == ""))
+    |> Enum.join(", ")
+  end
+
+  defp tags_input_value(%Phoenix.HTML.FormField{value: value}) when is_binary(value), do: value
+  defp tags_input_value(_), do: ""
 end

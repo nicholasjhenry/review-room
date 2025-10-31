@@ -118,24 +118,24 @@
 
 ### Tests for User Story 3 (Write these FIRST) ⚠️
 
-- [ ] T044 [P] [US3] Write unit test: create_snippet with tags array stores all tags in test/review_room/snippets_test.exs
-- [ ] T045 [P] [US3] Write unit test: create_snippet with more than 10 tags returns error in test/review_room/snippets_test.exs
-- [ ] T046 [P] [US3] Write unit test: create_snippet with whitespace and duplicate tags normalizes in test/review_room/snippets_test.exs
-- [ ] T047 [P] [US3] Write unit test: create_snippet without tags succeeds in test/review_room/snippets_test.exs
-- [ ] T048 [P] [US3] Write unit test: list_all_tags returns unique tags in test/review_room/snippets_test.exs
-- [ ] T049 [P] [US3] Write unit test: list_snippets_by_tag filters correctly in test/review_room/snippets_test.exs
-- [ ] T050 [P] [US3] Write integration test: Submit snippet with tags saves tag array in test/review_room_web/live/snippet_live_test.exs
-- [ ] T051 [P] [US3] Write integration test: View snippet displays tags in test/review_room_web/live/snippet_live_test.exs
-- [ ] T052 Run mix test to verify all US3 tests FAIL before implementation
+- [X] T044 [P] [US3] Write unit test: create_snippet with tags array stores all tags in test/review_room/snippets_test.exs
+- [X] T045 [P] [US3] Write unit test: create_snippet with more than 10 tags returns error in test/review_room/snippets_test.exs
+- [X] T046 [P] [US3] Write unit test: create_snippet with whitespace and duplicate tags normalizes in test/review_room/snippets_test.exs
+- [X] T047 [P] [US3] Write unit test: create_snippet without tags succeeds in test/review_room/snippets_test.exs
+- [X] T048 [P] [US3] Write unit test: list_all_tags returns unique tags in test/review_room/snippets_test.exs
+- [X] T049 [P] [US3] Write unit test: list_snippets_by_tag filters correctly in test/review_room/snippets_test.exs
+- [X] T050 [P] [US3] Write integration test: Submit snippet with tags saves tag array in test/review_room_web/live/snippet_live_test.exs
+- [X] T051 [P] [US3] Write integration test: View snippet displays tags in test/review_room_web/live/snippet_live_test.exs
+- [X] T052 Run mix test to verify all US3 tests FAIL before implementation
 
 ### Implementation for User Story 3
 
-- [ ] T053 [P] [US3] Implement list_all_tags/0 function in lib/review_room/snippets.ex
-- [ ] T054 [P] [US3] Implement list_snippets_by_tag/2 function in lib/review_room/snippets.ex
-- [ ] T055 [US3] Update new.html.heex template to include tags input field in lib/review_room_web/live/snippet_live/new.html.heex
-- [ ] T056 [US3] Update show.html.heex template to display tags in lib/review_room_web/live/snippet_live/show.html.heex
-- [ ] T057 Run mix test test/review_room/snippets_test.exs to verify US3 unit tests PASS
-- [ ] T058 Run mix test test/review_room_web/live/snippet_live_test.exs to verify US3 integration tests PASS
+- [X] T053 [P] [US3] Implement list_all_tags/0 function in lib/review_room/snippets.ex
+- [X] T054 [P] [US3] Implement list_snippets_by_tag/2 function in lib/review_room/snippets.ex
+- [X] T055 [US3] Update new.html.heex template to include tags input field in lib/review_room_web/live/snippet_live/new.html.heex
+- [X] T056 [US3] Update show.html.heex template to display tags in lib/review_room_web/live/snippet_live/show.html.heex
+- [X] T057 Run mix test test/review_room/snippets_test.exs to verify US3 unit tests PASS
+- [X] T058 Run mix test test/review_room_web/live/snippet_live_test.exs to verify US3 integration tests PASS
 
 **Checkpoint**: User Story 3 complete - snippets support tagging for organization
 
