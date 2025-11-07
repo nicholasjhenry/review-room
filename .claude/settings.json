@@ -1,0 +1,19 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/script/claude-setup"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": ["Bash(mise *)", "Bash(mix *)", "Bash(script/*)", "Read(.)", "Write(.)"],
+    "deny": ["Read(./.env)", "Read(./.env.*)"]
+  }
+}

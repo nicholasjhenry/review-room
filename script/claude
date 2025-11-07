@@ -1,0 +1,22 @@
+#!/bin/bash
+set -e
+
+cd "$(dirname "$0")/.."
+
+# Install mise if not present
+if ! command -v mise &> /dev/null; then
+    curl https://mise.run | sh
+    export PATH="$HOME/.local/bin:$PATH"
+fi
+
+# Install tools from .mise.toml or .tool-versions
+mise install
+
+# Persist PATH for subsequent commands
+echo "export PATH=\"$HOME/.local/bin:\$PATH\"" >> "$CLAUDE_ENV_FILE"
+echo "eval \"\$(mise activate bash)\"" >> "$CLAUDE_ENV_FILE"
+
+# Run your existing setup
+cp .env.template .env 2>/dev/null || true
+
+script/setup
