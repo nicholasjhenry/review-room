@@ -76,7 +76,8 @@ defmodule ReviewRoom.MixProject do
       {:bandit, "~> 1.5"},
       {:igniter, "~> 0.6", only: [:dev, :test]},
       {:tidewave, "~> 0.1", only: [:dev]},
-      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:autumn, "~> 0.1.0"}
     ]
   end
 

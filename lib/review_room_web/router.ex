@@ -54,6 +54,11 @@ defmodule ReviewRoomWeb.Router do
       on_mount: [{ReviewRoomWeb.UserAuth, :require_authenticated}] do
       live "/users/settings", UserLive.Settings, :edit
       live "/users/settings/confirm-email/:token", UserLive.Settings, :confirm_email
+
+      # Authenticated snippet management
+      live "/snippets", SnippetLive.Index, :index
+      live "/snippets/new", SnippetLive.Form, :new
+      live "/snippets/:id/edit", SnippetLive.Form, :edit
     end
 
     post "/users/update-password", UserSessionController, :update_password
@@ -67,6 +72,9 @@ defmodule ReviewRoomWeb.Router do
       live "/users/register", UserLive.Registration, :new
       live "/users/log-in", UserLive.Login, :new
       live "/users/log-in/:token", UserLive.Confirmation, :new
+
+      # Public/unlisted snippet viewing
+      live "/snippets/:id", SnippetLive.Show, :show
     end
 
     post "/users/log-in", UserSessionController, :create

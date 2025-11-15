@@ -22,7 +22,29 @@ config :review_room, :scopes,
 
 config :review_room,
   ecto_repos: [ReviewRoom.Repo],
-  generators: [timestamp_type: :utc_datetime, binary_id: true]
+  generators: [timestamp_type: :utc_datetime, binary_id: true],
+  supported_languages: [
+    {"elixir", "Elixir"},
+    {"javascript", "JavaScript"},
+    {"python", "Python"},
+    {"ruby", "Ruby"},
+    {"go", "Go"},
+    {"rust", "Rust"},
+    {"sql", "SQL"},
+    {"html", "HTML"},
+    {"css", "CSS"},
+    {"json", "JSON"},
+    {"yaml", "YAML"},
+    {"markdown", "Markdown"},
+    {"bash", "Bash"},
+    {"typescript", "TypeScript"},
+    {"java", "Java"},
+    {"c", "C"},
+    {"cpp", "C++"},
+    {"csharp", "C#"},
+    {"php", "PHP"},
+    {"swift", "Swift"}
+  ]
 
 # Configures the endpoint
 config :review_room, ReviewRoomWeb.Endpoint,
