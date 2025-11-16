@@ -1,15 +1,15 @@
 <!--
 Sync Impact Report
-Version change: 1.0.0 -> 1.1.0
+Version change: 1.1.0 -> 1.2.0
 Modified principles: None
-Added sections: Skill-Driven Implementation (new principle under Engineering Standards)
+Added sections: Pre-Commit Validation (new NON-NEGOTIABLE principle under Engineering Standards)
 Removed sections: None
 Templates requiring updates:
-- ✅ .specify/templates/plan-template.md (Constitution Check section aligns)
+- ✅ .specify/templates/plan-template.md (no changes needed)
 - ✅ .specify/templates/spec-template.md (no changes needed)
 - ✅ .specify/templates/tasks-template.md (no changes needed)
-- ⚠ CLAUDE.md (needs update with skill invocation requirement)
-Follow-up TODOs: Update CLAUDE.md with mandatory skill invocation before code generation
+- ✅ CLAUDE.md (already contains mix precommit guidance)
+Follow-up TODOs: None - all templates aligned with new principle
 -->
 
 # ReviewRoom Constitution
@@ -59,6 +59,14 @@ Follow-up TODOs: Update CLAUDE.md with mandatory skill invocation before code ge
 
 **Rationale**: Skills encode project-specific and ecosystem-specific conventions that prevent style drift, reduce review cycles, and ensure consistency across the codebase. Automated skill consultation eliminates "reinventing the wheel" and catches violations before they reach reviewers.
 
+### Pre-Commit Validation (NON-NEGOTIABLE)
+- Run `mix precommit` immediately upon completing any feature implementation, before marking the feature as complete.
+- If `mix precommit` fails, fix all reported issues (formatting, credo warnings, test failures, Dialyzer errors) before proceeding.
+- Do not request review, mark tasks complete, or consider implementation finished until `mix precommit` passes successfully.
+- Block merges when `mix precommit` has not been run or when any precommit checks fail.
+
+**Rationale**: Automated precommit validation catches code quality issues, type errors, and test failures immediately during implementation rather than during review. This reduces review cycles, maintains consistent code quality, and ensures that broken code never reaches reviewers or the main branch.
+
 ### Phoenix & Ecto Conventions
 - Follow Phoenix phx.gen.auth routing guidance: place routes inside the correct pipeline and live_session, and explain scope choices in every review.
 - Use Accounts.Scope for authorization and pass current_scope to context functions; templates must access @current_scope.user exclusively.
@@ -71,7 +79,6 @@ Follow-up TODOs: Update CLAUDE.md with mandatory skill invocation before code ge
 - Prefer the bundled Req client for HTTP calls; adding alternatives requires explicit approval and configuration documentation.
 - Provide typespecs and typedocs for every public context module and Ecto schema using the mandated template that enumerates fields and associations.
 - Extend priv/repo/seeds.exs (or dedicated seed modules) with representative demo data for each feature to enable manual verification.
-- Run mix precommit prior to requesting review to guarantee formatting, credo, tests, dialyzer, and other linters pass locally.
 
 ## Delivery Workflow & Tooling
 
@@ -88,4 +95,4 @@ Follow-up TODOs: Update CLAUDE.md with mandatory skill invocation before code ge
 - Compliance is reviewed in every pull request; merges are blocked until the Constitution Check passes and mandated tests exist and fail prior to implementation.
 - Track ratification and amendment metadata in this document and reference the governing version in commit messages when altering process.
 
-**Version**: 1.1.0 | **Ratified**: 2025-10-30 | **Last Amended**: 2025-11-16
+**Version**: 1.2.0 | **Ratified**: 2025-10-30 | **Last Amended**: 2025-11-16
