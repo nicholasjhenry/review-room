@@ -118,3 +118,10 @@ _A code generation and project patching framework_
 <!-- igniter-end -->
 
 <!-- usage-rules-end -->
+
+## Active Technologies
+- Elixir ~> 1.15 + Phoenix ~> 1.8.1, Phoenix LiveView ~> 1.1.0, Ecto SQL ~> 3.13, PostgreSQL (001-snippet-creation)
+- PostgreSQL (via Ecto) for snippets, tags, and associations (001-snippet-creation)
+
+## Recent Changes
+- 001-snippet-creation: Added Elixir ~> 1.15 + Phoenix ~> 1.8.1, Phoenix LiveView ~> 1.1.0, Ecto SQL ~> 3.13, PostgreSQL
