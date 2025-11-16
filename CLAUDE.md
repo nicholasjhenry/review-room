@@ -13,6 +13,79 @@ manual verification of new features.
 
 Always use the `Accounts.Scope` for authorization.
 
+## Code Generation Rules (MANDATORY)
+
+**BEFORE generating ANY Elixir/Phoenix code, you MUST invoke the appropriate skills:**
+
+### Required Skills by Code Type
+
+| Code Type | Required Skill(s) | What It Provides |
+|-----------|------------------|------------------|
+| Context modules | `phoenix-contexts` | Macro usage, action patterns, typespec conventions |
+| Schema/Record modules | `ecto` | Schema patterns, changeset best practices, query patterns |
+| LiveView modules | `phoenix-liveview` | Mount patterns, event handling, stream usage |
+| Templates (HEEx) | `phoenix-html` | Form helpers, component syntax, safety patterns |
+| GenServers/Supervisors | `elixir-otp` | OTP patterns, state management, supervision trees |
+| Tests | `elixir-testing` | ExUnit patterns, test organization, fixtures |
+| Type specs | `elixir-typespec` | Typespec conventions, Dialyzer usage |
+| Core Elixir | `elixir-core` | Pattern matching, function design, data structures |
+
+### Mandatory Conventions
+
+After invoking skills, generated code MUST follow these patterns:
+
+**Context Modules:**
+- Use `use ReviewRoom, :context` macro
+- No `@doc` on action functions
+- All actions have `@spec` with `Attrs.t()` (NEVER `map()`)
+- Pass `Scope.t()` for authorization
+
+**Record (Schema) Modules:**
+- Use `use ReviewRoom, :record` macro  
+- All functions marked `@doc false`
+- Use `Snippet.id()` for IDs (NEVER `Ecto.UUID.t()`)
+- Define `@type id :: pos_integer()` and `@type t :: %__MODULE__{...}`
+
+**Example - Context:**
+```elixir
+defmodule ReviewRoom.Snippets do
+  use ReviewRoom, :context
+  
+  alias ReviewRoom.Snippets.Snippet
+
+  @spec create_snippet(Attrs.t(), Scope.t()) :: 
+    {:ok, Snippet.t()} | {:error, Changeset.t(Snippet.t())}
+  def create_snippet(attrs, scope) do
+    # Implementation
+  end
+end
+```
+
+**Example - Record:**
+```elixir
+defmodule ReviewRoom.Snippets.Snippet do
+  use ReviewRoom, :record
+
+  @type id :: pos_integer()
+  @type t :: %__MODULE__{...}
+
+  schema "snippets" do
+    # fields
+  end
+
+  @doc false
+  def changeset(snippet, attrs) do
+    # Implementation
+  end
+end
+```
+
+### Enforcement
+
+- Run `mix precommit` before marking implementation complete
+- Violations block merge until corrected
+- Refer to `.specify/memory/constitution.md` for full requirements
+
 ## Your Workflow
 
 You have the ability to browse the web with a full Chrome browser via the system shell to fulfill the user's needs, ie:

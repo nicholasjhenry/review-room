@@ -36,6 +36,7 @@
 - [ ] Dependencies, configuration changes, and feature contracts documented explicitly; no hidden coupling.
 - [ ] Failure handling strategy captured for each external dependency (timeouts, retries, structured logging).
 - [ ] Demo data additions planned for priv/repo/seeds.exs so manual verification remains possible.
+- [ ] Skill-driven implementation planned: required skills identified (e.g., phoenix-contexts, ecto, elixir-testing) and conventions documented for code generation compliance.
 
 ## Project Structure
 
