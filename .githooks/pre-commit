@@ -1,0 +1,26 @@
+#!/bin/sh
+#
+# Pre-commit hook to run mix precommit checks
+# This ensures code quality before commits
+#
+# To install this hook, run:
+#   git config core.hooksPath .githooks
+
+echo "Running mix precommit checks..."
+
+# Run mix precommit
+mix precommit
+
+# Check the exit status
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "❌ mix precommit failed. Please fix the issues before committing."
+  echo "   To bypass this check (not recommended), use: git commit --no-verify"
+  echo ""
+  exit 1
+fi
+
+echo ""
+echo "✅ All precommit checks passed!"
+echo ""
+exit 0
