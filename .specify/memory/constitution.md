@@ -1,14 +1,15 @@
 <!--
 Sync Impact Report
-Version change: N/A -> 1.0.0
-Modified principles: Initial set defined (Test-First Development, Explicit Over Implicit, Fail Fast, Fail Loud)
-Added sections: Core Principles, Engineering Standards, Delivery Workflow & Tooling, Governance
-Removed sections: Placeholder principle slots (IV, V)
+Version change: 1.0.0 -> 1.1.0
+Modified principles: None
+Added sections: Skill-Driven Implementation (new principle under Engineering Standards)
+Removed sections: None
 Templates requiring updates:
-- ✅ .specify/templates/plan-template.md
-- ✅ .specify/templates/spec-template.md
-- ✅ .specify/templates/tasks-template.md
-Follow-up TODOs: None
+- ✅ .specify/templates/plan-template.md (Constitution Check section aligns)
+- ✅ .specify/templates/spec-template.md (no changes needed)
+- ✅ .specify/templates/tasks-template.md (no changes needed)
+- ⚠ CLAUDE.md (needs update with skill invocation requirement)
+Follow-up TODOs: Update CLAUDE.md with mandatory skill invocation before code generation
 -->
 
 # ReviewRoom Constitution
@@ -41,8 +42,32 @@ Follow-up TODOs: None
 
 ## Engineering Standards
 
+### Skill-Driven Implementation (NON-NEGOTIABLE)
+- Invoke the appropriate language and framework skills BEFORE generating any implementation code.
+- For Elixir/Phoenix projects, MUST invoke these skills before implementation:
+  - `elixir-core` for all Elixir code (pattern matching, functions, data structures)
+  - `elixir-otp` for GenServers, Supervisors, and concurrent systems
+  - `phoenix-contexts` for context modules and business logic
+  - `ecto` for schemas, changesets, and queries
+  - `phoenix-liveview` for LiveView modules and real-time features
+  - `phoenix-html` for templates and forms
+  - `elixir-testing` for ExUnit tests
+  - `elixir-typespec` for type specifications
+- Skills provide authoritative patterns, conventions, and best practices that MUST be followed.
+- Code generation that violates loaded skill guidance requires explicit justification in review.
+- Block merges when generated code does not follow skill-mandated conventions (e.g., missing `use ReviewRoom, :context`, incorrect typespec usage, missing `@doc false` on record functions).
+
+**Rationale**: Skills encode project-specific and ecosystem-specific conventions that prevent style drift, reduce review cycles, and ensure consistency across the codebase. Automated skill consultation eliminates "reinventing the wheel" and catches violations before they reach reviewers.
+
+### Phoenix & Ecto Conventions
 - Follow Phoenix phx.gen.auth routing guidance: place routes inside the correct pipeline and live_session, and explain scope choices in every review.
 - Use Accounts.Scope for authorization and pass current_scope to context functions; templates must access @current_scope.user exclusively.
+- Context modules MUST use `use ReviewRoom, :context` macro.
+- Record (schema) modules MUST use `use ReviewRoom, :record` macro.
+- Action functions in contexts MUST have `@spec` with `Attrs.t()` for parameters (NEVER `map()`).
+- Action functions MUST NOT have `@doc` documentation (remove all module-level docs).
+- Record functions MUST have `@doc false`.
+- Use `Snippet.id()` for record IDs (NEVER `Ecto.UUID.t()` or `integer()` directly).
 - Prefer the bundled Req client for HTTP calls; adding alternatives requires explicit approval and configuration documentation.
 - Provide typespecs and typedocs for every public context module and Ecto schema using the mandated template that enumerates fields and associations.
 - Extend priv/repo/seeds.exs (or dedicated seed modules) with representative demo data for each feature to enable manual verification.
@@ -63,4 +88,4 @@ Follow-up TODOs: None
 - Compliance is reviewed in every pull request; merges are blocked until the Constitution Check passes and mandated tests exist and fail prior to implementation.
 - Track ratification and amendment metadata in this document and reference the governing version in commit messages when altering process.
 
-**Version**: 1.0.0 | **Ratified**: 2025-10-30 | **Last Amended**: 2025-10-30
+**Version**: 1.1.0 | **Ratified**: 2025-10-30 | **Last Amended**: 2025-11-16
