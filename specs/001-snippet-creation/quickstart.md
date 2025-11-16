@@ -798,7 +798,7 @@ Before considering this feature complete, verify:
 - ✅ XSS protection verified (templates auto-escape)
 - ✅ 500KB snippet handling tested and performant
 - ✅ Tag filtering returns correct results
-- ✅ Constitution compliance verified (TDD, explicit dependencies, fail-fast)
+- ✅ Constitution compliance verified (TDD, explicit dependencies, fail-fast, skill-driven implementation)
 
 ---
 

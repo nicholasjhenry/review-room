@@ -32,6 +32,7 @@ Implement snippet creation functionality allowing developers to create, organize
 - [x] **Dependencies documented explicitly**: Syntax highlighting library choice needs research (Phase 0). No hidden global state - all dependencies passed explicitly through function signatures. Configuration for max snippet size (500KB) and supported languages list to be validated at boot.
 - [x] **Failure handling strategy captured**: Validation failures (user-facing errors), database persistence failures (5s timeout, log with context), syntax highlighting load failures (circuit breaker after 3 failures, degrade to plain text), unauthorized access attempts (log security events, return 404), oversized content (real-time feedback, log potential abuse).
 - [x] **Demo data additions planned**: Will extend priv/repo/seeds.exs with representative snippets covering all languages, visibility levels, tag combinations, and edge cases (large snippets, special characters) for manual verification.
+- [ ] **Skill-driven implementation verified**: Required skills (`phoenix-contexts`, `ecto`, `phoenix-liveview`, `elixir-core`, `elixir-testing`) must be invoked before code generation. All generated code must follow skill-mandated conventions (context macro usage, typespec patterns, documentation rules). Constitution v1.1.0 compliance required.
 
 ## Project Structure
 
