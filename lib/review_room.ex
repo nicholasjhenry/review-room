@@ -12,7 +12,6 @@ defmodule ReviewRoom do
       use Ecto.Schema
 
       alias ReviewRoom.Attrs
-      alias ReviewRoom.Identifier
 
       import Ecto.Changeset
       import Ecto.Query, warn: false
