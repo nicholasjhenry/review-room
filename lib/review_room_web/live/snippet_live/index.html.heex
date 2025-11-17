@@ -1,0 +1,32 @@
+<.header>
+  My Snippets
+  <:actions>
+    <.link navigate={~p"/snippets/new"}>
+      <.button>New Snippet</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="snippets"
+  rows={@streams.snippets}
+  row_click={fn {_id, snippet} -> JS.navigate(~p"/s/#{snippet.slug}") end}
+>
+  <:col :let={{_id, snippet}} label="Title">{snippet.title}</:col>
+  <:col :let={{_id, snippet}} label="Language">{snippet.language}</:col>
+  <:col :let={{_id, snippet}} label="Visibility">{snippet.visibility}</:col>
+  <:action :let={{_id, snippet}}>
+    <div class="sr-only">
+      <.link navigate={~p"/s/#{snippet.slug}"}>Show</.link>
+    </div>
+    <.link navigate={~p"/snippets/#{snippet.slug}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, snippet}}>
+    <.link
+      phx-click={JS.push("delete", value: %{slug: snippet.slug}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>

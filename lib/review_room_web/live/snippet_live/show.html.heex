@@ -1,0 +1,31 @@
+<.header>
+  Snippet {@snippet.title}
+  <:subtitle>This is a snippet record from your database.</:subtitle>
+  <:actions>
+    <.link navigate={~p"/snippets/#{@snippet.slug}/edit"}>
+      <.button>Edit snippet</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Title">{@snippet.title}</:item>
+  <:item title="Description">{@snippet.description}</:item>
+  <:item title="Language">{@snippet.language}</:item>
+  <:item title="Visibility">{@snippet.visibility}</:item>
+  <:item title="Tags">{Enum.join(@snippet.tags, ", ")}</:item>
+  <:item title="Code">
+    <div id="snippet-code" phx-hook="SyntaxHighlight" phx-update="ignore">
+      <pre><code class={if @snippet.language, do: "language-#{@snippet.language}", else: ""}>{@snippet.code}</code></pre>
+    </div>
+  </:item>
+</.list>
+
+<div class="mt-4">
+  <.link
+    navigate={~p"/snippets"}
+    class="text-sm font-semibold leading-6 text-zinc-900 hover:text-zinc-700"
+  >
+    <.icon name="hero-arrow-left" class="h-3 w-3" /> Back to snippets
+  </.link>
+</div>

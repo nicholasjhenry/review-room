@@ -1,0 +1,49 @@
+<.header>
+  New Snippet
+  <:subtitle>Use this form to create a new snippet in your database.</:subtitle>
+</.header>
+
+<.form for={@form} id="snippet-form" phx-change="validate" phx-submit="save">
+  <.input field={@form[:title]} type="text" label="Title" required />
+  <.input field={@form[:description]} type="textarea" label="Description" />
+  <.input
+    field={@form[:code]}
+    type="textarea"
+    label="Code"
+    required
+    phx-hook="CodeInput"
+    id="code-input"
+  />
+  <div id="size-counter" class="text-sm text-gray-600"></div>
+
+  <.input
+    field={@form[:language]}
+    type="select"
+    label="Language"
+    options={language_options()}
+    prompt="Select a language"
+  />
+
+  <.input field={@form[:tags]} type="text" label="Tags (comma-separated)" />
+
+  <.input
+    field={@form[:visibility]}
+    type="select"
+    label="Visibility"
+    options={[{"Private", "private"}, {"Public", "public"}, {"Unlisted", "unlisted"}]}
+    required
+  />
+
+  <div class="mt-4">
+    <.button phx-disable-with="Saving..." variant="primary">Save Snippet</.button>
+  </div>
+</.form>
+
+<div class="mt-4">
+  <.link
+    navigate={~p"/snippets"}
+    class="text-sm font-semibold leading-6 text-zinc-900 hover:text-zinc-700"
+  >
+    <.icon name="hero-arrow-left" class="h-3 w-3" /> Back to snippets
+  </.link>
+</div>

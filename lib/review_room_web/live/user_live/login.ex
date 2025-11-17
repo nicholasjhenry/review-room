@@ -12,7 +12,7 @@ defmodule ReviewRoomWeb.UserLive.Login do
           <.header>
             <p>Log in</p>
             <:subtitle>
-              <%= if @current_scope do %>
+              <%= if @current_scope && @current_scope.user do %>
                 You need to reauthenticate to perform sensitive actions on your account.
               <% else %>
                 Don't have an account? <.link
@@ -43,7 +43,7 @@ defmodule ReviewRoomWeb.UserLive.Login do
           phx-submit="submit_magic"
         >
           <.input
-            readonly={!!@current_scope}
+            readonly={!!(@current_scope && @current_scope.user)}
             field={f[:email]}
             type="email"
             label="Email"
@@ -67,7 +67,7 @@ defmodule ReviewRoomWeb.UserLive.Login do
           phx-trigger-action={@trigger_submit}
         >
           <.input
-            readonly={!!@current_scope}
+            readonly={!!(@current_scope && @current_scope.user)}
             field={f[:email]}
             type="email"
             label="Email"

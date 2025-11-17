@@ -180,7 +180,7 @@ defmodule ReviewRoomWeb.UserAuthTest do
       _ = Accounts.generate_user_session_token(user)
       conn = UserAuth.fetch_current_scope_for_user(conn, [])
       refute get_session(conn, :user_token)
-      refute conn.assigns.current_scope
+      assert conn.assigns.current_scope == %Accounts.Scope{user: nil}
     end
 
     test "reissues a new token after a few days and refreshes cookie", %{conn: conn, user: user} do
@@ -232,7 +232,7 @@ defmodule ReviewRoomWeb.UserAuthTest do
       {:cont, updated_socket} =
         UserAuth.on_mount(:mount_current_scope, %{}, session, %LiveView.Socket{})
 
-      assert updated_socket.assigns.current_scope == nil
+      assert updated_socket.assigns.current_scope == %Accounts.Scope{user: nil}
     end
 
     test "assigns nil to current_scope assign if there isn't a user_token", %{conn: conn} do
@@ -241,7 +241,7 @@ defmodule ReviewRoomWeb.UserAuthTest do
       {:cont, updated_socket} =
         UserAuth.on_mount(:mount_current_scope, %{}, session, %LiveView.Socket{})
 
-      assert updated_socket.assigns.current_scope == nil
+      assert updated_socket.assigns.current_scope == %Accounts.Scope{user: nil}
     end
   end
 
@@ -266,7 +266,7 @@ defmodule ReviewRoomWeb.UserAuthTest do
       }
 
       {:halt, updated_socket} = UserAuth.on_mount(:require_authenticated, %{}, session, socket)
-      assert updated_socket.assigns.current_scope == nil
+      assert updated_socket.assigns.current_scope == %Accounts.Scope{user: nil}
     end
 
     test "redirects to login page if there isn't a user_token", %{conn: conn} do
@@ -278,7 +278,7 @@ defmodule ReviewRoomWeb.UserAuthTest do
       }
 
       {:halt, updated_socket} = UserAuth.on_mount(:require_authenticated, %{}, session, socket)
-      assert updated_socket.assigns.current_scope == nil
+      assert updated_socket.assigns.current_scope == %Accounts.Scope{user: nil}
     end
   end
 

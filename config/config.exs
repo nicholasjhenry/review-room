@@ -22,7 +22,12 @@ config :review_room, :scopes,
 
 config :review_room,
   ecto_repos: [ReviewRoom.Repo],
-  generators: [timestamp_type: :utc_datetime, binary_id: true]
+  generators: [timestamp_type: :utc_datetime, binary_id: true],
+  max_snippet_size: 512_000,
+  supported_languages: ~w(
+    elixir javascript python ruby go rust
+    sql html css json yaml markdown
+  )
 
 # Configures the endpoint
 config :review_room, ReviewRoomWeb.Endpoint,
